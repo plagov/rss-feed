@@ -34,7 +34,7 @@ public class PostService {
         this.postDao = postDao;
     }
 
-    @Scheduled(cron = "0 */3 * * * *")
+    @Scheduled(cron = "0 */10 * * * *")
     public void recordLatestBlogPost() {
         logger.info("Running scheduled service");
         var allBlogs = blogDao.getAllBlogs();
@@ -50,7 +50,7 @@ public class PostService {
     }
 
     private void saveNewPostsFromFeed(Blog blog, Post latestSavedPost) {
-        var postIndex = getIndexOfLatestSavedPostInFeed(latestSavedPost, blog); // let it be 2, for example
+        var postIndex = getIndexOfLatestSavedPostInFeed(latestSavedPost, blog);
         var allEntries = getEntriesFromFeed(blog);
         for (var i = postIndex - 1; i >= 0; i--) {
             saveNewPost(blog, allEntries.get(i));
