@@ -1,20 +1,26 @@
 package io.plagov.rssfeedtonotion.dao;
 
 import io.plagov.rssfeedtonotion.domain.Post;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class PostDao {
 
-    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
-    public PostDao(DataSource dataSource) {
-        this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+    public PostDao(DataSource dataSource, JdbcTemplate jdbcTemplate) {
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public Post getLatestPostForBlog(String blogName) {
@@ -23,16 +29,28 @@ public class PostDao {
                 FROM posts p
                 JOIN blogs b ON p.blog_id = b.id
                 WHERE b.name = :blogName
-                ORDER BY p.post_date DESC
+                ORDER BY p.id DESC
                 LIMIT 1;""";
 
-        return jdbcTemplate.queryForObject(sql, Map.of("blogName", blogName), (rs, rowNum) ->
-                new Post(rs.getInt("id"),
-                        rs.getInt("blog_id"),
+        try {
+            return namedParameterJdbcTemplate.queryForObject(sql, Map.of("blogName", blogName), mapToPost());
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    private static RowMapper<Post> mapToPost() {
+        return (rs, rowNum) ->
+                new Post(rs.getInt("blog_id"),
                         rs.getString("post_name"),
                         rs.getString("post_url"),
-                        rs.getObject("post_date", LocalDateTime.class)
-                )
-        );
+                        rs.getBoolean("is_read"),
+                        rs.getObject("date_added", LocalDateTime.class)
+                );
+    }
+
+    public void savePost(Post post) {
+        String sql = "INSERT INTO posts (blog_id, post_name, post_url, is_read) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(sql, post.blogId(), post.name(), post.url(), post.isRead());
     }
 }
