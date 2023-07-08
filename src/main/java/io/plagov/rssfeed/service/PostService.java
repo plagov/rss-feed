@@ -1,13 +1,13 @@
-package io.plagov.rssfeedtonotion.service;
+package io.plagov.rssfeed.service;
 
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
-import io.plagov.rssfeedtonotion.dao.BlogDao;
-import io.plagov.rssfeedtonotion.dao.PostDao;
-import io.plagov.rssfeedtonotion.domain.Blog;
-import io.plagov.rssfeedtonotion.domain.Post;
+import io.plagov.rssfeed.dao.BlogDao;
+import io.plagov.rssfeed.dao.PostDao;
+import io.plagov.rssfeed.domain.Blog;
+import io.plagov.rssfeed.domain.Post;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -34,7 +34,7 @@ public class PostService {
         this.postDao = postDao;
     }
 
-    @Scheduled(cron = "0 */10 * * * *")
+    @Scheduled(cron = "@midnight")
     public void recordLatestBlogPost() {
         logger.info("Running scheduled service");
         var allBlogs = blogDao.getAllBlogs();

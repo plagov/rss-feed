@@ -1,4 +1,4 @@
-package io.plagov.rssfeedtonotion.domain;
+package io.plagov.rssfeed.domain;
 
 import java.time.LocalDateTime;
 

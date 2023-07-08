@@ -1,6 +1,6 @@
-package io.plagov.rssfeedtonotion.dao;
+package io.plagov.rssfeed.dao;
 
-import io.plagov.rssfeedtonotion.domain.Blog;
+import io.plagov.rssfeed.domain.Blog;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 

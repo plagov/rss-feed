@@ -1,4 +1,4 @@
-package io.plagov.rssfeedtonotion.domain;
+package io.plagov.rssfeed.domain;
 
 public record Blog(
     int id,

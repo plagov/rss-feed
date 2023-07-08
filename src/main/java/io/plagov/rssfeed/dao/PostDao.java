@@ -1,6 +1,6 @@
-package io.plagov.rssfeedtonotion.dao;
+package io.plagov.rssfeed.dao;
 
-import io.plagov.rssfeedtonotion.domain.Post;
+import io.plagov.rssfeed.domain.Post;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Optional;
 
 @Component
 public class PostDao {

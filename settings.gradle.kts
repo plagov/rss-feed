@@ -1,1 +1,1 @@
-rootProject.name = "rss-feed-to-notion"
+rootProject.name = "rss-feed"
