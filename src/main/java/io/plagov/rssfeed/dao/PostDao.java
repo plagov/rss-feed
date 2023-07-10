@@ -51,8 +51,8 @@ public class PostDao {
     }
 
     public void savePost(Post post) {
-        String sql = "INSERT INTO posts (blog_id, post_name, post_url, is_read) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, post.blogId(), post.name(), post.url(), post.isRead());
+        String sql = "INSERT INTO posts (blog_id, post_name, post_url, is_read) VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, post.blogId(), post.name(), post.url(), post.isRead(), post.dateAdded());
     }
 
     public List<Post> getAllUnreadPosts() {
