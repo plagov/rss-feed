@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -51,5 +53,10 @@ public class PostDao {
     public void savePost(Post post) {
         String sql = "INSERT INTO posts (blog_id, post_name, post_url, is_read) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, post.blogId(), post.name(), post.url(), post.isRead());
+    }
+
+    public List<Post> getAllUnreadPosts() {
+        var sql = "SELECT * FROM posts WHERE is_read = FALSE";
+        return jdbcTemplate.query(sql, mapToPost());
     }
 }
