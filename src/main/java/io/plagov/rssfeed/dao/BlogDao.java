@@ -22,4 +22,11 @@ public class BlogDao {
                 rs.getString("feed_url")
         ));
     }
+
+    public void addNewBlog(String blogName, String feedUrl) {
+        jdbcTemplate.update("INSERT INTO blogs (name, feed_url) VALUES (?, ?)",
+                blogName,
+                feedUrl
+        );
+    }
 }
