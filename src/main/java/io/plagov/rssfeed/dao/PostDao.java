@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.List;
 import java.util.Map;
 
 @Component
@@ -51,7 +50,7 @@ public class PostDao {
     }
 
     public void savePost(Post post) {
-        String sql = "INSERT INTO posts (blog_id, post_name, post_url, is_read) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added) VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, post.blogId(), post.name(), post.url(), post.isRead(), post.dateAdded());
     }
 
