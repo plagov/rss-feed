@@ -1,6 +1,7 @@
 package io.plagov.rssfeed.dao;
 
-import io.plagov.rssfeed.domain.Post;
+import io.plagov.rssfeed.domain.request.PostRequest;
+import io.plagov.rssfeed.domain.response.PostResponse;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -23,7 +24,7 @@ public class PostDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Post getLatestPostForBlog(String blogName) {
+    public PostResponse getLatestPostForBlog(String blogName) {
         var sql = """
                 SELECT p.*
                 FROM posts p
@@ -39,9 +40,10 @@ public class PostDao {
         }
     }
 
-    private static RowMapper<Post> mapToPost() {
+    private static RowMapper<PostResponse> mapToPost() {
         return (rs, rowNum) ->
-                new Post(rs.getInt("blog_id"),
+                new PostResponse(rs.getInt("id"),
+                        rs.getInt("blog_id"),
                         rs.getString("post_name"),
                         rs.getString("post_url"),
                         rs.getBoolean("is_read"),
@@ -49,12 +51,12 @@ public class PostDao {
                 );
     }
 
-    public void savePost(Post post) {
-        String sql = "INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added) VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, post.blogId(), post.name(), post.url(), post.isRead(), post.dateAdded());
+    public void savePost(PostRequest post) {
+        String sql = "INSERT INTO posts (blog_id, post_name, post_url, date_added) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(sql, post.blogId(), post.name(), post.url(), post.dateAdded());
     }
 
-    public List<Post> getAllUnreadPosts() {
+    public List<PostResponse> getAllUnreadPosts() {
         var sql = "SELECT * FROM posts WHERE is_read = FALSE";
         return jdbcTemplate.query(sql, mapToPost());
     }
