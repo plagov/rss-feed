@@ -1,7 +1,7 @@
 package io.plagov.rssfeed.controller;
 
 import io.plagov.rssfeed.dao.PostDao;
-import io.plagov.rssfeed.domain.Post;
+import io.plagov.rssfeed.domain.response.PostResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +19,7 @@ public class PostController {
     }
     
     @GetMapping("/unread")
-    public List<Post> getAllUnreadPosts() {
+    public List<PostResponse> getAllUnreadPosts() {
         return postDao.getAllUnreadPosts();
     }
 }

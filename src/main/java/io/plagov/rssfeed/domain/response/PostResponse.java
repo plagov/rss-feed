@@ -1,8 +1,9 @@
-package io.plagov.rssfeed.domain;
+package io.plagov.rssfeed.domain.response;
 
 import java.time.LocalDateTime;
 
-public record Post(
+public record PostResponse(
+        int id,
         int blogId,
         String name,
         String url,

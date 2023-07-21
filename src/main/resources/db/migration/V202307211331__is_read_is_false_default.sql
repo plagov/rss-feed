@@ -1,0 +1,2 @@
+ALTER TABLE posts
+    ALTER COLUMN is_read SET DEFAULT FALSE;
