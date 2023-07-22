@@ -60,4 +60,9 @@ public class PostDao {
         var sql = "SELECT * FROM posts WHERE is_read = FALSE";
         return jdbcTemplate.query(sql, mapToPost());
     }
+
+    public void markPostAsRead(int postId) {
+        var sql = "UPDATE posts SET is_read = TRUE WHERE id = ?";
+        jdbcTemplate.update(sql, postId);
+    }
 }
