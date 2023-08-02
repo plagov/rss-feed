@@ -1,12 +1,11 @@
 package io.plagov.rssfeed.controller;
 
-import io.plagov.rssfeed.domain.Blog;
 import io.plagov.rssfeed.domain.request.NewBlog;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -15,7 +14,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,6 +38,7 @@ class BlogControllerTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @SuppressWarnings("'Delete' statement without 'where' clears all data in the table")
     @BeforeEach
     void cleanUp() {
         jdbcTemplate.execute("DELETE FROM blogs");
@@ -48,15 +48,25 @@ class BlogControllerTest {
     @Test
     void shouldAddNewBlog() {
         var newBlog = new NewBlog("Test Name", "blog.com/feed");
-        blogController.addNewBlog(newBlog);
+        var response = blogController.addNewBlog(newBlog);
+
         assertThat(blogController.getAllBlogs()).hasSize(1);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        var blog = blogController.getBlogById(Objects.requireNonNull(response.getBody()));
+        assertThat(blog).extracting("name", "url").containsExactly(newBlog.name(), newBlog.feedUrl());
     }
 
-    @NotNull
-    private List<Blog> getAllBlogs() {
-        return jdbcTemplate.query("SELECT * FROM blogs", (resultSet, i) ->
-                new Blog(resultSet.getInt("id"),
-                        resultSet.getString("name"),
-                        resultSet.getString("feed_url")));
+    @Test
+    void shouldUpdateBlogFeedUrlByBlogId() {
+        var newBlog = new NewBlog("Test Name", "blog.com/feed");
+        int blogId = Objects.requireNonNull(blogController.addNewBlog(newBlog).getBody());
+
+        var updatedBlogRequest = new NewBlog("Test Name One", "blog.com/rss");
+        blogController.updateBlog(blogId, updatedBlogRequest);
+
+        var updatedBlog = blogController.getBlogById(blogId);
+        assertThat(updatedBlog)
+                .extracting("name", "url")
+                .containsExactly(updatedBlogRequest.name(), updatedBlogRequest.feedUrl());
     }
 }
