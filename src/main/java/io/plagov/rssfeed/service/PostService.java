@@ -43,18 +43,18 @@ public class PostService {
         var allBlogs = blogDao.getAllBlogs();
         allBlogs.forEach(blog -> {
             var latestSavedPost = postDao.getLatestPostForBlog(blog.name());
+            var allEntries = getEntriesFromFeed(blog);
 
             if (latestSavedPost == null) {
-                recordFirstEntryForBlog(blog);
-            } else if (!latestSavedPostIsLatestInFeed(latestSavedPost, blog)) {
-                saveNewPostsFromFeed(blog, latestSavedPost);
+                recordFirstEntryForBlog(blog, allEntries);
+            } else if (!latestSavedPostIsLatestInFeed(latestSavedPost, allEntries)) {
+                saveNewPostsFromFeed(blog, latestSavedPost, allEntries);
             }
         });
     }
 
-    private void saveNewPostsFromFeed(Blog blog, PostResponse latestSavedPost) {
-        var postIndex = getIndexOfLatestSavedPostInFeed(latestSavedPost, blog);
-        var allEntries = getEntriesFromFeed(blog);
+    private void saveNewPostsFromFeed(Blog blog, PostResponse latestSavedPost, List<SyndEntry> allEntries) {
+        var postIndex = getIndexOfLatestSavedPostInFeed(latestSavedPost, allEntries);
         for (var i = postIndex - 1; i >= 0; i--) {
             var entry = allEntries.get(i);
             var post = new PostRequest(blog.id(), entry.getTitle(), entry.getLink(), LocalDateTime.now(clock));
@@ -62,21 +62,20 @@ public class PostService {
         }
     }
 
-    private boolean latestSavedPostIsLatestInFeed(PostResponse latestSavedPost, Blog blog) {
-        var index = getIndexOfLatestSavedPostInFeed(latestSavedPost, blog);
+    private boolean latestSavedPostIsLatestInFeed(PostResponse latestSavedPost, List<SyndEntry> allEntries) {
+        var index = getIndexOfLatestSavedPostInFeed(latestSavedPost, allEntries);
         return index == 0;
     }
 
-    private int getIndexOfLatestSavedPostInFeed(PostResponse latestSavedPost, Blog blog) {
-        var allEntriesFromFeed = getEntriesFromFeed(blog);
-        return IntStream.range(0, allEntriesFromFeed.size())
-                .filter(i -> allEntriesFromFeed.get(i).getTitle().equals(latestSavedPost.name()))
+    private int getIndexOfLatestSavedPostInFeed(PostResponse latestSavedPost, List<SyndEntry> entriesFromFeed) {
+        return IntStream.range(0, entriesFromFeed.size())
+                .filter(i -> entriesFromFeed.get(i).getTitle().equals(latestSavedPost.name()))
                 .findFirst()
                 .orElseThrow();
     }
 
-    private void recordFirstEntryForBlog(Blog blog) {
-        var latestEntryFromFeed = getEntriesFromFeed(blog).get(0);
+    private void recordFirstEntryForBlog(Blog blog, List<SyndEntry> allEntries) {
+        var latestEntryFromFeed = allEntries.get(0);
         logger.info("No saved posts in database for blog {}", blog.name());
         var post = new PostRequest(blog.id(),
                 latestEntryFromFeed.getTitle(),
