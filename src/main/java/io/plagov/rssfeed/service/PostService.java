@@ -39,9 +39,10 @@ public class PostService {
 
     @Scheduled(cron = "@midnight")
     public void recordLatestBlogPost() {
-        logger.info("Running scheduled service");
+        logger.info("Running scheduled post service");
         var allBlogs = blogDao.getAllBlogs();
         allBlogs.forEach(blog -> {
+            logger.info("Evaluate blog {}", blog.name());
             var latestSavedPost = postDao.getLatestPostForBlog(blog.name());
             var allEntries = getEntriesFromFeed(blog);
 
@@ -55,6 +56,7 @@ public class PostService {
 
     private void saveNewPostsFromFeed(Blog blog, PostResponse latestSavedPost, List<SyndEntry> allEntries) {
         var postIndex = getIndexOfLatestSavedPostInFeed(latestSavedPost, allEntries);
+        logger.info("Save latest post for blog {}", blog.name());
         for (var i = postIndex - 1; i >= 0; i--) {
             var entry = allEntries.get(i);
             var post = new PostRequest(blog.id(), entry.getTitle(), entry.getLink(), LocalDateTime.now(clock));
