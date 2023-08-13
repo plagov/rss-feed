@@ -27,8 +27,6 @@ public class PostService {
     private final BlogDao blogDao;
     private final PostDao postDao;
     private final Clock clock;
-    private final SyndFeedInput feedInput = new SyndFeedInput();
-
     private final Logger logger = LoggerFactory.getLogger(PostService.class);
 
     public PostService(BlogDao blogDao, PostDao postDao, Clock clock) {
@@ -93,7 +91,8 @@ public class PostService {
 
     private List<SyndEntry> getEntriesFromFeed(Blog blog) {
         try {
-            return feedInput.build(new XmlReader(new URL(blog.url()))).getEntries();
+            return new SyndFeedInput().build(new XmlReader(new URL(blog.url())))
+                    .getEntries().stream().limit(5).toList();
         } catch (FeedException | IOException exception) {
             var errorMessage = "An exception occurred while reading the feed for blog %s".formatted(blog.url());
             logger.error(errorMessage, exception);
