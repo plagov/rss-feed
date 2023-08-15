@@ -1,12 +1,10 @@
 package io.plagov.rssfeed.service;
 
-import com.rometools.rome.feed.synd.SyndEntry;
-import com.rometools.rome.io.FeedException;
-import com.rometools.rome.io.SyndFeedInput;
-import com.rometools.rome.io.XmlReader;
+import com.apptasticsoftware.rssreader.RssReader;
 import io.plagov.rssfeed.dao.BlogDao;
 import io.plagov.rssfeed.dao.PostDao;
 import io.plagov.rssfeed.domain.Blog;
+import io.plagov.rssfeed.domain.PostItem;
 import io.plagov.rssfeed.domain.request.PostRequest;
 import io.plagov.rssfeed.domain.response.PostResponse;
 import org.slf4j.Logger;
@@ -15,7 +13,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URL;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,34 +49,34 @@ public class PostService {
         });
     }
 
-    private void saveNewPostsFromFeed(Blog blog, PostResponse latestSavedPost, List<SyndEntry> allEntries) {
+    private void saveNewPostsFromFeed(Blog blog, PostResponse latestSavedPost, List<PostItem> allEntries) {
         var postIndex = getIndexOfLatestSavedPostInFeed(latestSavedPost, allEntries);
         logger.info("Save latest post for blog {}", blog.name());
         for (var i = postIndex - 1; i >= 0; i--) {
             var entry = allEntries.get(i);
-            var post = new PostRequest(blog.id(), entry.getTitle(), entry.getLink(), LocalDateTime.now(clock));
+            var post = new PostRequest(blog.id(), entry.title(), entry.link(), LocalDateTime.now(clock));
             saveNewPost(post);
         }
     }
 
-    private boolean latestSavedPostIsLatestInFeed(PostResponse latestSavedPost, List<SyndEntry> allEntries) {
+    private boolean latestSavedPostIsLatestInFeed(PostResponse latestSavedPost, List<PostItem> allEntries) {
         var index = getIndexOfLatestSavedPostInFeed(latestSavedPost, allEntries);
         return index == 0;
     }
 
-    private int getIndexOfLatestSavedPostInFeed(PostResponse latestSavedPost, List<SyndEntry> entriesFromFeed) {
+    private int getIndexOfLatestSavedPostInFeed(PostResponse latestSavedPost, List<PostItem> entriesFromFeed) {
         return IntStream.range(0, entriesFromFeed.size())
-                .filter(i -> entriesFromFeed.get(i).getTitle().equals(latestSavedPost.name()))
+                .filter(i -> entriesFromFeed.get(i).title().equals(latestSavedPost.name()))
                 .findFirst()
                 .orElseThrow();
     }
 
-    private void recordFirstEntryForBlog(Blog blog, List<SyndEntry> allEntries) {
+    private void recordFirstEntryForBlog(Blog blog, List<PostItem> allEntries) {
         var latestEntryFromFeed = allEntries.get(0);
         logger.info("No saved posts in database for blog {}", blog.name());
         var post = new PostRequest(blog.id(),
-                latestEntryFromFeed.getTitle(),
-                latestEntryFromFeed.getLink(),
+                latestEntryFromFeed.title(),
+                latestEntryFromFeed.link(),
                 LocalDateTime.now(clock));
         saveNewPost(post);
     }
@@ -89,11 +86,14 @@ public class PostService {
         postDao.savePost(post);
     }
 
-    private List<SyndEntry> getEntriesFromFeed(Blog blog) {
+    private List<PostItem> getEntriesFromFeed(Blog blog) {
+        RssReader rssReader = new RssReader();
         try {
-            return new SyndFeedInput().build(new XmlReader(new URL(blog.url())))
-                    .getEntries().stream().limit(5).toList();
-        } catch (FeedException | IOException exception) {
+            return rssReader.read(blog.url()).limit(5)
+                    .filter(item -> item.getTitle().isPresent() && item.getLink().isPresent())
+                    .map(item -> new PostItem(item.getTitle().get(), item.getLink().get()))
+                    .toList();
+        } catch (IOException exception) {
             var errorMessage = "An exception occurred while reading the feed for blog %s".formatted(blog.url());
             logger.error(errorMessage, exception);
             throw new RuntimeException(errorMessage);
