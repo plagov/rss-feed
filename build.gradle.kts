@@ -18,7 +18,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    implementation("com.rometools:rome:2.1.0")
+    implementation("com.apptasticsoftware:rssreader:3.4.6")
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
     implementation("org.testcontainers:postgresql:$testContainersVersion")
