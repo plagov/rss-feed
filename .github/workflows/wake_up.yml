@@ -1,7 +1,7 @@
 name: Wake up
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '57 23 * * *'
 jobs:
   make-request:
     runs-on: ubuntu-latest
