@@ -1,0 +1,12 @@
+name: Wake up
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+jobs:
+  make-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call health endpoint to wake up the app
+        run: |
+          response=$(curl --location 'https://rss-feed.fly.dev/actuator/health' --header 'Content-Type: application/json')
+          echo "Response from API: $response"
