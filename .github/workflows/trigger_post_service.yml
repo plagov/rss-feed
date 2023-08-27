@@ -6,6 +6,14 @@ jobs:
   make-request:
     runs-on: ubuntu-latest
     steps:
+      - name: Request health check
+        run: |
+          health_response=$(curl https://rss-feed.fly.dev/actuator/health)
+          echo "Health response: $health_response"
+
+      - name: Wait for 30 seconds
+        run: sleep 30s
+
       - name: Trigger post service
         run: |
           response=$(curl -X POST https://rss-feed.fly.dev/posts/fetch-latest)
