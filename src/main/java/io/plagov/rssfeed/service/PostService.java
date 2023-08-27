@@ -11,7 +11,6 @@ import io.plagov.rssfeed.domain.request.PostRequest;
 import io.plagov.rssfeed.domain.response.PostResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -35,10 +34,10 @@ public class PostService {
         this.clock = clock;
     }
 
-    @Scheduled(cron = "@midnight")
     public void recordLatestBlogPost() {
-        logger.info("Running scheduled post service");
+        logger.info("Evaluate all blogs");
         var allBlogs = blogDao.getAllBlogs();
+        logger.info("All blogs to evaluate: {}", allBlogs.stream().map(Blog::name));
         allBlogs.forEach(blog -> {
             logger.info("Evaluate blog {}", blog.name());
             var latestSavedPost = postDao.getLatestPostForBlog(blog.name());
@@ -50,6 +49,7 @@ public class PostService {
                 saveNewPostsFromFeed(blog, latestSavedPost, allEntries);
             }
         });
+        logger.info("Finish evaluating blogs");
     }
 
     private void saveNewPostsFromFeed(Blog blog, PostResponse latestSavedPost, List<SyndEntry> allEntries) {

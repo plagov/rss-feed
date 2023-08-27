@@ -1,0 +1,12 @@
+name: Trigger post service
+on:
+  schedule:
+    - cron: '45 18 * * *'
+jobs:
+  make-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger post service
+        run: |
+          response=$(curl -X POST https://rss-feed.fly.dev/posts/fetch-latest)
+          echo "Response from API: $response"
