@@ -37,7 +37,6 @@ public class PostService {
     public void recordLatestBlogPost() {
         logger.info("Evaluate all blogs");
         var allBlogs = blogDao.getAllBlogs();
-        logger.info("All blogs to evaluate: {}", allBlogs.stream().map(Blog::name));
         allBlogs.forEach(blog -> {
             logger.info("Evaluate blog {}", blog.name());
             var latestSavedPost = postDao.getLatestPostForBlog(blog.name());
