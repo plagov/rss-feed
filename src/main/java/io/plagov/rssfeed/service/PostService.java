@@ -3,7 +3,6 @@ package io.plagov.rssfeed.service;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
-import com.rometools.rome.io.XmlReader;
 import io.plagov.rssfeed.dao.BlogDao;
 import io.plagov.rssfeed.dao.PostDao;
 import io.plagov.rssfeed.domain.Blog;
@@ -12,6 +11,7 @@ import io.plagov.rssfeed.domain.response.PostResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.xml.sax.InputSource;
 
 import java.io.IOException;
 import java.net.URL;
@@ -90,7 +90,7 @@ public class PostService {
 
     private List<SyndEntry> getEntriesFromFeed(Blog blog) {
         try {
-            return new SyndFeedInput().build(new XmlReader(new URL(blog.url())))
+            return new SyndFeedInput().build(new InputSource(new URL(blog.url()).openStream()))
                     .getEntries().stream().limit(5).toList();
         } catch (FeedException | IOException exception) {
             var errorMessage = "An exception occurred while reading the feed for blog %s".formatted(blog.url());
