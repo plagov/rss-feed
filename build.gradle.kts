@@ -2,12 +2,12 @@ import org.flywaydb.gradle.task.FlywayMigrateTask
 
 plugins {
     java
-    id("org.springframework.boot") version "3.1.3"
-    id("io.spring.dependency-management") version "1.1.0"
-    id("org.flywaydb.flyway") version "9.22.0"
+    id("org.springframework.boot") version "3.1.4"
+    id("io.spring.dependency-management") version "1.1.3"
+    id("org.flywaydb.flyway") version "9.22.3"
 }
 
-val testContainersVersion = "1.19.0"
+val testContainersVersion = "1.19.1"
 
 group = "io.plagov"
 version = "0.0.1-SNAPSHOT"
