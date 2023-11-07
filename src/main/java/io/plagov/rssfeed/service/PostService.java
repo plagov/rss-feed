@@ -68,7 +68,7 @@ public class PostService {
 
     private int getIndexOfLatestSavedPostInFeed(PostResponse latestSavedPost, List<SyndEntry> entriesFromFeed) {
         return IntStream.range(0, entriesFromFeed.size())
-                .filter(i -> entriesFromFeed.get(i).getTitle().equals(latestSavedPost.name()))
+                .filter(i -> entriesFromFeed.get(i).getLink().equals(latestSavedPost.url()))
                 .findFirst()
                 .orElseThrow();
     }
