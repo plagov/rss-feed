@@ -34,21 +34,28 @@ public class PostService {
         this.clock = clock;
     }
 
-    public void recordLatestBlogPost() {
+    public void recordLatestBlogPosts() {
         logger.info("Evaluate all blogs");
-        var allBlogs = blogDao.getAllBlogs();
-        allBlogs.forEach(blog -> {
-            logger.info("Evaluate blog {}", blog.name());
-            var latestSavedPost = postDao.getLatestPostForBlog(blog.name());
-            var allEntries = getEntriesFromFeed(blog);
-
-            if (latestSavedPost == null) {
-                recordFirstEntryForBlog(blog, allEntries);
-            } else if (!latestSavedPostIsLatestInFeed(latestSavedPost, allEntries)) {
-                saveNewPostsFromFeed(blog, latestSavedPost, allEntries);
-            }
-        });
+        blogDao.getAllBlogs().forEach(this::recordLatestForBlog);
         logger.info("Finish evaluating blogs");
+    }
+
+    public void recordLatestPostsForBlog(int blogId) {
+        var blog = blogDao.getBlogById(blogId);
+        recordLatestForBlog(blog);
+        logger.info("Finish evaluating blog {}", blog.name());
+    }
+
+    private void recordLatestForBlog(Blog blog) {
+        logger.info("Evaluate blog {}", blog.name());
+        var latestSavedPost = postDao.getLatestPostForBlog(blog.name());
+        var allEntries = getEntriesFromFeed(blog);
+
+        if (latestSavedPost == null) {
+            recordFirstEntryForBlog(blog, allEntries);
+        } else if (!latestSavedPostIsLatestInFeed(latestSavedPost, allEntries)) {
+            saveNewPostsFromFeed(blog, latestSavedPost, allEntries);
+        }
     }
 
     private void saveNewPostsFromFeed(Blog blog, PostResponse latestSavedPost, List<SyndEntry> allEntries) {

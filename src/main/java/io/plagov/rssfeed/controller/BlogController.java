@@ -3,6 +3,7 @@ package io.plagov.rssfeed.controller;
 import io.plagov.rssfeed.dao.BlogDao;
 import io.plagov.rssfeed.domain.Blog;
 import io.plagov.rssfeed.domain.request.NewBlog;
+import io.plagov.rssfeed.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,17 +17,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/blogs")
 public class BlogController {
 
     private final BlogDao blogDao;
+    private final PostService postService;
 
     private final Logger logger = LoggerFactory.getLogger(BlogController.class);
 
-    public BlogController(BlogDao blogDao) {
+    public BlogController(BlogDao blogDao, PostService postService) {
         this.blogDao = blogDao;
+        this.postService = postService;
     }
 
     @PostMapping("/add")
@@ -50,5 +54,11 @@ public class BlogController {
     @GetMapping("/{id}")
     public Blog getBlogById(@PathVariable int id) {
         return blogDao.getBlogById(id);
+    }
+
+    @PostMapping("/{id}/fetch-latest")
+    public String fetchLatestPostsForBlog(@PathVariable int id) {
+        CompletableFuture.runAsync(() -> postService.recordLatestPostsForBlog(id));
+        return "Fetching latest posts task is triggered";
     }
 }
