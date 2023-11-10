@@ -37,7 +37,7 @@ public class PostController {
 
     @PostMapping("/fetch-latest")
     public String fetchLatestPosts() {
-        CompletableFuture.runAsync(postService::recordLatestBlogPost);
+        CompletableFuture.runAsync(postService::recordLatestBlogPosts);
         return "Fetching latest posts task is triggered";
     }
 }
