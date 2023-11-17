@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}">
+
+    <script src="/js/bootstrap.min.js" th:src="@{/js/bootstrap.min.js}"></script>
+    <title>RSS Feed</title>
+</head>
+<body>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>URL</th>
+        <th>Date added</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${posts.isEmpty()}">
+        <td colspan="2">No posts available</td>
+    </tr>
+    <tr th:each="post : ${posts}">
+        <td><span th:text="${post.id}">ID</span></td>
+        <td><span th:text="${post.name}">Title</span></td>
+        <td><a th:text="${post.url}" th:href="@{${post.url}}" target="_blank">URL</a></td>
+        <td><span th:text="${#temporals.format(post.dateAdded, 'yyyy-MM-dd')}">Date added</span></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
