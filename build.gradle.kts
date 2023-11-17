@@ -2,7 +2,7 @@ import org.flywaydb.gradle.task.FlywayMigrateTask
 
 plugins {
     java
-    id("org.springframework.boot") version "3.1.4"
+    id("org.springframework.boot") version "3.1.5"
     id("io.spring.dependency-management") version "1.1.3"
     id("org.flywaydb.flyway") version "9.22.3"
 }
@@ -23,6 +23,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-testcontainers")
     implementation("org.springframework.boot:spring-boot-devtools")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     implementation("com.rometools:rome:2.1.0")
     implementation("org.postgresql:postgresql")
