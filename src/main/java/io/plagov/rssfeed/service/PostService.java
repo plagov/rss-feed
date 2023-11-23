@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -36,7 +37,9 @@ public class PostService {
 
     public void recordLatestBlogPosts() {
         logger.info("Evaluate all blogs");
-        blogDao.getAllBlogs().forEach(this::recordLatestForBlog);
+        var allBlogs = blogDao.getAllBlogs();
+        Collections.shuffle(allBlogs);
+        allBlogs.forEach(this::recordLatestForBlog);
         logger.info("Finish evaluating blogs");
     }
 
