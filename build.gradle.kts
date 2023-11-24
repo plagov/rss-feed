@@ -2,9 +2,14 @@ import org.flywaydb.gradle.task.FlywayMigrateTask
 
 plugins {
     java
+    application
     id("org.springframework.boot") version "3.1.5"
     id("io.spring.dependency-management") version "1.1.3"
     id("org.flywaydb.flyway") version "9.22.3"
+}
+
+application {
+    mainClass.set("com.microsoft.playwright.CLI")
 }
 
 val testContainersVersion = "1.19.1"
@@ -26,6 +31,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("com.microsoft.playwright:playwright:1.40.0")
     implementation("com.rometools:rome:2.1.0")
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
