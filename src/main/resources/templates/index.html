@@ -15,7 +15,6 @@
     <tr>
         <th>ID</th>
         <th>Title</th>
-        <th>URL</th>
         <th>Date added</th>
     </tr>
     </thead>
@@ -25,8 +24,7 @@
     </tr>
     <tr th:each="post : ${posts}">
         <td><span th:text="${post.id}">ID</span></td>
-        <td><span th:text="${post.name}">Title</span></td>
-        <td><a th:text="${post.url}" th:href="@{${post.url}}" target="_blank">URL</a></td>
+        <td><a th:text="${post.name}" th:href="@{${post.url}}" target="_blank">Title</a></td>
         <td><span th:text="${#temporals.format(post.dateAdded, 'yyyy-MM-dd')}">Date added</span></td>
     </tr>
     </tbody>
