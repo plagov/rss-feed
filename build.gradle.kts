@@ -30,6 +30,7 @@ dependencies {
     implementation("com.rometools:rome:2.1.0")
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:9.5.0")
     implementation("org.testcontainers:postgresql:$testContainersVersion")
     implementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     implementation("org.junit.jupiter:junit-jupiter:5.10.0")
@@ -61,4 +62,8 @@ tasks.register<JavaExec>("playwrightInstall") {
     classpath(sourceSets["test"].runtimeClasspath)
     mainClass.set("com.microsoft.playwright.CLI")
     args = listOf("install-deps")
+}
+
+tasks.named("test").configure {
+    dependsOn("playwrightInstall")
 }
