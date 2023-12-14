@@ -2,8 +2,8 @@ import org.flywaydb.gradle.task.FlywayMigrateTask
 
 plugins {
     java
-    id("org.springframework.boot") version "3.1.5"
-    id("io.spring.dependency-management") version "1.1.3"
+    id("org.springframework.boot") version "3.2.0"
+    id("io.spring.dependency-management") version "1.1.4"
     id("org.flywaydb.flyway") version "9.22.3"
 }
 
@@ -54,7 +54,7 @@ task("flywayMigrateLocal", FlywayMigrateTask::class) {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 
