@@ -63,7 +63,3 @@ tasks.register<JavaExec>("playwrightInstall") {
     mainClass.set("com.microsoft.playwright.CLI")
     args = listOf("install-deps")
 }
-
-tasks.named("test").configure {
-    dependsOn("playwrightInstall")
-}

@@ -34,7 +34,7 @@ class PostViewTest extends E2eBaseTest {
     void canViewCorrectNumberOfColumns() {
         page.navigate("http://localhost:" + port);
         var columnHeadings = page.locator("table thead tr th").allTextContents();
-        Assertions.assertThat(columnHeadings).containsExactly("ID", "Title", "Date added");
+        Assertions.assertThat(columnHeadings).containsExactly("ID", "Title", "Date added", "Mark as read");
     }
 
     @Test
@@ -43,5 +43,14 @@ class PostViewTest extends E2eBaseTest {
         page.navigate("http://localhost:" + port);
         var postTitleCell = page.locator("tbody > tr:nth-child(1) > td:nth-child(2) > a");
         PlaywrightAssertions.assertThat(postTitleCell).hasAttribute("href", "https://post1.com");
+    }
+
+    @Test
+    @Sql("/sql/posts/add_posts.sql")
+    void userCanMarkPostAsRead() {
+        page.navigate("http://localhost:" + port);
+        page.locator("tr[data-testid='post-2'] button").click();
+        var remainingRow = page.locator("tr[data-testid='post-1'] td:nth-child(2)");
+        PlaywrightAssertions.assertThat(remainingRow).hasText("Post 1");
     }
 }
