@@ -14,7 +14,7 @@ public abstract class E2eBaseTest {
     @BeforeEach
     void setUpPlaywright() {
         playwright = Playwright.create();
-        browser = playwright.webkit().launch();
+        browser = playwright.chromium().launch();
         page = browser.newPage();
     }
 }

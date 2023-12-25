@@ -30,6 +30,12 @@ public class PostController {
         return postDao.getAllUnreadPosts();
     }
 
+    /**
+     * @deprecated
+     * This controller is replaced by a View Controller.
+     * <p>See {@link io.plagov.rssfeed.view.PostsView#markPostAsRead}</p>
+     */
+    @Deprecated
     @PatchMapping("/mark-as-read/{id}")
     public void markPostAsRead(@PathVariable("id") int postId) {
         postDao.markPostAsRead(postId);
