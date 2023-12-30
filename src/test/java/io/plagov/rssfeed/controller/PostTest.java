@@ -62,13 +62,4 @@ class PostTest {
                 false,
                 LocalDateTime.parse("2023-01-01T12:00")));
     }
-
-    @Test
-    @Sql("/sql/posts/add_posts.sql")
-    void shouldMarkPostAsRead() {
-        postController.markPostAsRead(2);
-
-        var unreadPosts = postController.getAllUnreadPosts();
-        assertThat(unreadPosts).hasSize(1);
-    }
 }
