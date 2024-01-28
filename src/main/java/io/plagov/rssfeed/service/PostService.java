@@ -14,7 +14,8 @@ import org.springframework.stereotype.Component;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -54,10 +55,10 @@ public class PostService {
         var latestSavedPost = postDao.getLatestPostForBlog(blog.name());
         var allEntries = getEntriesFromFeed(blog);
 
-        if (latestSavedPost == null) {
+        if (latestSavedPost.isEmpty()) {
             recordFirstEntryForBlog(blog, allEntries);
-        } else if (!latestSavedPostIsLatestInFeed(latestSavedPost, allEntries)) {
-            saveNewPostsFromFeed(blog, latestSavedPost, allEntries);
+        } else if (!latestSavedPostIsLatestInFeed(latestSavedPost.get(), allEntries)) {
+            saveNewPostsFromFeed(blog, latestSavedPost.get(), allEntries);
         }
     }
 
@@ -84,7 +85,7 @@ public class PostService {
     }
 
     private void recordFirstEntryForBlog(Blog blog, List<SyndEntry> allEntries) {
-        var latestEntryFromFeed = allEntries.get(0);
+        var latestEntryFromFeed = allEntries.getFirst();
         logger.info("No saved posts in database for blog {}", blog.name());
         var post = new PostRequest(blog.id(),
                 latestEntryFromFeed.getTitle(),
@@ -100,9 +101,9 @@ public class PostService {
 
     private List<SyndEntry> getEntriesFromFeed(Blog blog) {
         try {
-            return new SyndFeedInput().build(new InputSource(new URL(blog.url()).openStream()))
+            return new SyndFeedInput().build(new InputSource(new URI(blog.url()).toURL().openStream()))
                     .getEntries().stream().toList();
-        } catch (FeedException | IOException exception) {
+        } catch (FeedException | IOException | URISyntaxException exception) {
             var errorMessage = "An exception occurred while reading the feed for blog %s".formatted(blog.url());
             logger.error(errorMessage, exception);
             throw new RuntimeException(errorMessage);
