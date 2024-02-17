@@ -34,7 +34,6 @@ dependencies {
     implementation("org.testcontainers:postgresql:$testContainersVersion")
     implementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     implementation("org.junit.jupiter:junit-jupiter:5.10.2")
-//    implementation("org.assertj:assertj-core:3.24.2")
 }
 
 tasks.withType<Test> {
