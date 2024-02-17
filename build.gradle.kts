@@ -2,12 +2,12 @@ import org.flywaydb.gradle.task.FlywayMigrateTask
 
 plugins {
     java
-    id("org.springframework.boot") version "3.2.0"
+    id("org.springframework.boot") version "3.2.2"
     id("io.spring.dependency-management") version "1.1.4"
-    id("org.flywaydb.flyway") version "9.22.3"
+    id("org.flywaydb.flyway") version "10.8.1"
 }
 
-val testContainersVersion = "1.19.1"
+val testContainersVersion = "1.19.5"
 
 group = "io.plagov"
 version = "0.0.1-SNAPSHOT"
@@ -26,15 +26,15 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    implementation("com.microsoft.playwright:playwright:1.40.0")
+    implementation("com.microsoft.playwright:playwright:1.41.2")
     implementation("com.rometools:rome:2.1.0")
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
-    implementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:9.5.0")
+    implementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:10.0.0")
     implementation("org.testcontainers:postgresql:$testContainersVersion")
     implementation("org.testcontainers:junit-jupiter:$testContainersVersion")
-    implementation("org.junit.jupiter:junit-jupiter:5.10.0")
-    implementation("org.assertj:assertj-core:3.24.2")
+    implementation("org.junit.jupiter:junit-jupiter:5.10.2")
+//    implementation("org.assertj:assertj-core:3.24.2")
 }
 
 tasks.withType<Test> {
