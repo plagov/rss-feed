@@ -4,11 +4,11 @@ plugins {
     java
     id("org.springframework.boot") version "3.2.3"
     id("io.spring.dependency-management") version "1.1.4"
-    id("org.flywaydb.flyway") version "10.8.1"
+    id("org.flywaydb.flyway") version "10.9.1"
     id("com.github.ben-manes.versions") version "0.51.0"
 }
 
-val testContainersVersion = "1.19.6"
+val testContainersVersion = "1.19.7"
 
 group = "io.plagov"
 version = "0.0.1-SNAPSHOT"
