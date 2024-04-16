@@ -4,7 +4,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.2.3"
     id("io.spring.dependency-management") version "1.1.4"
-    id("org.flywaydb.flyway") version "10.9.1"
+    id("org.flywaydb.flyway") version "9.22.3"
     id("com.github.ben-manes.versions") version "0.51.0"
 }
 
@@ -35,6 +35,7 @@ dependencies {
     implementation("org.testcontainers:postgresql:$testContainersVersion")
     implementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     implementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    implementation("com.github.java-json-tools:json-patch:1.13")
 }
 
 tasks.withType<Test> {

@@ -1,5 +1,8 @@
 package io.plagov.rssfeed.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.fge.jsonpatch.JsonPatch;
 import io.plagov.rssfeed.configuration.ContainersConfig;
 import io.plagov.rssfeed.domain.request.NewBlog;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,6 +29,9 @@ class BlogControllerTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @SuppressWarnings("'Delete' statement without 'where' clears all data in the table")
     @BeforeEach
@@ -45,16 +52,21 @@ class BlogControllerTest {
     }
 
     @Test
-    void shouldUpdateBlogFeedUrlByBlogId() {
+    void shouldUpdateBlogFeedUrlByBlogId() throws IOException {
         var newBlog = new NewBlog("Test Name", "blog.com/feed");
         int blogId = Objects.requireNonNull(blogController.addNewBlog(newBlog).getBody());
 
-        var updatedBlogRequest = new NewBlog("Test Name One", "blog.com/rss");
-        blogController.updateBlog(blogId, updatedBlogRequest);
+        ObjectNode patchOperation = objectMapper.createObjectNode()
+                .put("op", "replace")
+                .put("path", "/url")
+                .put("value", "blog.com/rss");
+        var patchArray = objectMapper.createArrayNode().add(patchOperation);
+        var jsonPatch = JsonPatch.fromJson(patchArray);
+        blogController.updateBlog(blogId, jsonPatch);
 
         var updatedBlog = blogController.getBlogById(blogId);
         assertThat(updatedBlog)
                 .extracting("name", "url")
-                .containsExactly(updatedBlogRequest.name(), updatedBlogRequest.feedUrl());
+                .containsExactly("Test Name", "blog.com/rss");
     }
 }

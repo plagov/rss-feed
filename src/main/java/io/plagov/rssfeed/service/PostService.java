@@ -45,7 +45,7 @@ public class PostService {
     }
 
     public void recordLatestPostsForBlog(int blogId) {
-        var blog = blogDao.getBlogById(blogId);
+        var blog = blogDao.getBlog(blogId);
         recordLatestForBlog(blog);
         logger.info("Finish evaluating blog {}", blog.name());
     }
