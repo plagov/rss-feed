@@ -32,7 +32,8 @@ public class BlogDao {
         return (rs, i) -> new Blog(
                 rs.getInt("id"),
                 rs.getString("name"),
-                rs.getString("feed_url")
+                rs.getString("feed_url"),
+                rs.getBoolean("is_subscribed")
         );
     }
 
@@ -40,12 +41,12 @@ public class BlogDao {
         return simpleJdbcInsert.executeAndReturnKey(Map.of("name", blogName, "feed_url", feedUrl)).intValue();
     }
 
-    public void updateBlogById(int blogId, String blogName, String feedUrl) {
-        var sql = "UPDATE blogs SET name = ?, feed_url = ? WHERE id = ?";
-        jdbcTemplate.update(sql, blogName, feedUrl, blogId);
+    public void updateBlog(int blogId, String blogName, String feedUrl, boolean isSubscribed) {
+        var sql = "UPDATE blogs SET name = ?, feed_url = ?, is_subscribed = ? WHERE id = ?";
+        jdbcTemplate.update(sql, blogName, feedUrl, isSubscribed, blogId);
     }
 
-    public Blog getBlogById(int blogId) {
+    public Blog getBlog(int blogId) {
         var sql = "SELECT * FROM blogs WHERE id = ?";
         return jdbcTemplate.queryForObject(sql, mapBlogRow(), blogId);
     }
