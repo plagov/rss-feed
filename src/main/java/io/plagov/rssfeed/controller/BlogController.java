@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -42,8 +43,8 @@ public class BlogController {
     }
 
     @GetMapping("/all")
-    public List<Blog> getAllBlogs() {
-        return blogDao.getAllBlogs();
+    public List<Blog> getBlogs(@RequestParam(value = "isSubscribed", defaultValue = "true") boolean isSubscribed) {
+        return blogDao.getBlogs(isSubscribed);
     }
 
     @PatchMapping(path = "/{id}", consumes = "application/json-patch+json")
