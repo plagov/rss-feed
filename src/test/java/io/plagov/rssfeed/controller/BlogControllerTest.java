@@ -45,7 +45,7 @@ class BlogControllerTest {
         var newBlog = new NewBlog("Test Name", "blog.com/feed");
         var response = blogController.addNewBlog(newBlog);
 
-        assertThat(blogController.getAllBlogs()).hasSize(1);
+        assertThat(blogController.getBlogs(true)).hasSize(1);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         var blog = blogController.getBlogById(Objects.requireNonNull(response.getBody()));
         assertThat(blog).extracting("name", "url").containsExactly(newBlog.name(), newBlog.feedUrl());

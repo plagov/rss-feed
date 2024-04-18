@@ -4,6 +4,7 @@ import io.plagov.rssfeed.domain.Blog;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 
@@ -15,16 +16,23 @@ public class BlogDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
+    private final JdbcClient jdbcClient;
 
-    public BlogDao(JdbcTemplate jdbcTemplate) {
+    public BlogDao(JdbcTemplate jdbcTemplate, JdbcClient jdbcClient) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("blogs")
                 .usingGeneratedKeyColumns("id");
+        this.jdbcClient = jdbcClient;
     }
 
-    public List<Blog> getAllBlogs() {
-        return jdbcTemplate.query("SELECT * FROM blogs", mapBlogRow());
+    public List<Blog>  getBlogs(boolean isSubscribed) {
+        var query = "SELECT * FROM blogs WHERE is_subscribed = ?";
+        return jdbcClient
+                .sql(query)
+                .params(isSubscribed)
+                .query(mapBlogRow())
+                .list();
     }
 
     @NotNull
@@ -38,7 +46,9 @@ public class BlogDao {
     }
 
     public int addNewBlog(String blogName, String feedUrl) {
-        return simpleJdbcInsert.executeAndReturnKey(Map.of("name", blogName, "feed_url", feedUrl)).intValue();
+        return simpleJdbcInsert
+                .executeAndReturnKey(Map.of("name", blogName, "feed_url", feedUrl, "is_subscribed", true))
+                .intValue();
     }
 
     public void updateBlog(int blogId, String blogName, String feedUrl, boolean isSubscribed) {

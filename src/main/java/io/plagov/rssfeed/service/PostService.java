@@ -38,7 +38,7 @@ public class PostService {
 
     public void recordLatestBlogPosts() {
         logger.info("Evaluate all blogs");
-        var allBlogs = blogDao.getAllBlogs();
+        var allBlogs = blogDao.getBlogs(true);
         Collections.shuffle(allBlogs);
         allBlogs.forEach(this::recordLatestForBlog);
         logger.info("Finish evaluating blogs");
