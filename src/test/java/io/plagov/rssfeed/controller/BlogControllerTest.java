@@ -48,7 +48,7 @@ class BlogControllerTest {
         assertThat(blogController.getBlogs(true)).hasSize(1);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         var blog = blogController.getBlogById(Objects.requireNonNull(response.getBody()));
-        assertThat(blog).extracting("name", "url").containsExactly(newBlog.name(), newBlog.feedUrl());
+        assertThat(blog).extracting("name", "feedUrl").containsExactly(newBlog.name(), newBlog.feedUrl());
     }
 
     @Test
@@ -58,7 +58,7 @@ class BlogControllerTest {
 
         ObjectNode patchOperation = objectMapper.createObjectNode()
                 .put("op", "replace")
-                .put("path", "/url")
+                .put("path", "/feedUrl")
                 .put("value", "blog.com/rss");
         var patchArray = objectMapper.createArrayNode().add(patchOperation);
         var jsonPatch = JsonPatch.fromJson(patchArray);
@@ -66,7 +66,7 @@ class BlogControllerTest {
 
         var updatedBlog = blogController.getBlogById(blogId);
         assertThat(updatedBlog)
-                .extracting("name", "url")
+                .extracting("name", "feedUrl")
                 .containsExactly("Test Name", "blog.com/rss");
     }
 }

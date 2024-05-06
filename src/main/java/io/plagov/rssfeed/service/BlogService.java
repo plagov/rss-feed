@@ -31,7 +31,7 @@ public class BlogService {
         } catch (JsonPatchException | JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        blogDao.updateBlog(blogId, patchedBlog.name(), patchedBlog.url(), patchedBlog.isSubscribed());
+        blogDao.updateBlog(blogId, patchedBlog.name(), patchedBlog.feedUrl(), patchedBlog.isSubscribed());
         return patchedBlog;
     }
 }

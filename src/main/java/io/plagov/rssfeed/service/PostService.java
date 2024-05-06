@@ -101,10 +101,10 @@ public class PostService {
 
     private List<SyndEntry> getEntriesFromFeed(Blog blog) {
         try {
-            return new SyndFeedInput().build(new InputSource(new URI(blog.url()).toURL().openStream()))
+            return new SyndFeedInput().build(new InputSource(new URI(blog.feedUrl()).toURL().openStream()))
                     .getEntries().stream().toList();
         } catch (FeedException | IOException | URISyntaxException exception) {
-            var errorMessage = "An exception occurred while reading the feed for blog %s".formatted(blog.url());
+            var errorMessage = "An exception occurred while reading the feed for blog %s".formatted(blog.feedUrl());
             logger.error(errorMessage, exception);
             throw new RuntimeException(errorMessage);
         }

@@ -550,7 +550,7 @@ legend + * {
 
 /* rtl:raw:
 [type="tel"],
-[type="url"],
+[type="feedUrl"],
 [type="email"],
 [type="number"] {
   direction: ltr;
