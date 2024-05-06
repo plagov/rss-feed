@@ -1,7 +1,8 @@
 package io.plagov.rssfeed.view;
 
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
-import io.plagov.rssfeed.E2eBaseTest;
+import com.microsoft.playwright.junit.UsePlaywright;
 import io.plagov.rssfeed.configuration.ContainersConfig;
 import org.assertj.core.api.Assertions;
 import org.flywaydb.test.annotation.FlywayTest;
@@ -16,14 +17,15 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Import(ContainersConfig.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @FlywayTest
-class PostViewTest extends E2eBaseTest {
+@UsePlaywright
+class PostViewTest {
 
     @LocalServerPort
     private int port;
 
     @Test
     @Sql("/sql/posts/add_posts.sql")
-    void canViewTableOfUnreadPosts() {
+    void canViewTableOfUnreadPosts(Page page) {
         page.navigate("http://localhost:" + port);
         var posts = page.querySelectorAll("table tbody tr");
         Assertions.assertThat(posts).hasSize(2);
@@ -31,7 +33,7 @@ class PostViewTest extends E2eBaseTest {
 
     @Test
     @Sql("/sql/posts/add_posts.sql")
-    void canViewCorrectNumberOfColumns() {
+    void canViewCorrectNumberOfColumns(Page page) {
         page.navigate("http://localhost:" + port);
         var columnHeadings = page.locator("table thead tr th").allTextContents();
         Assertions.assertThat(columnHeadings).containsExactly("ID", "Title", "Date added", "Mark as read");
@@ -39,7 +41,7 @@ class PostViewTest extends E2eBaseTest {
 
     @Test
     @Sql("/sql/posts/add_posts.sql")
-    void titleColumnContainsLinks() {
+    void titleColumnContainsLinks(Page page) {
         page.navigate("http://localhost:" + port);
         var postTitleCell = page.locator("tbody > tr:nth-child(1) > td:nth-child(2) > a");
         PlaywrightAssertions.assertThat(postTitleCell).hasAttribute("href", "https://post1.com");
@@ -47,7 +49,7 @@ class PostViewTest extends E2eBaseTest {
 
     @Test
     @Sql("/sql/posts/add_posts.sql")
-    void userCanMarkPostAsRead() {
+    void userCanMarkPostAsRead(Page page) {
         page.navigate("http://localhost:" + port);
         page.locator("tr[data-testid='post-2'] button").click();
         var remainingRow = page.locator("tr[data-testid='post-1'] td:nth-child(2)");
