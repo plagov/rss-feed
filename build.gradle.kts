@@ -8,7 +8,7 @@ plugins {
     id("com.github.ben-manes.versions") version "0.51.0"
 }
 
-val testContainersVersion = "1.19.7"
+val testContainersVersion = "1.19.8"
 
 group = "io.plagov"
 version = "0.0.1-SNAPSHOT"
@@ -27,7 +27,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    implementation("com.microsoft.playwright:playwright:1.43.0")
+    implementation("com.microsoft.playwright:playwright:1.44.0")
     implementation("com.rometools:rome:2.1.0")
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
