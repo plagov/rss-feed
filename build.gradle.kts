@@ -4,7 +4,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.5"
-    id("org.flywaydb.flyway") version "9.22.3"
+    id("org.flywaydb.flyway") version "10.15.0"
     id("com.github.ben-manes.versions") version "0.51.0"
 }
 
@@ -32,6 +32,7 @@ dependencies {
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:10.0.0")
+    implementation("org.flywaydb:flyway-database-postgresql:10.15.0")
     implementation("org.testcontainers:postgresql:$testContainersVersion")
     implementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     implementation("org.junit.jupiter:junit-jupiter:5.10.2")
