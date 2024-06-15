@@ -36,13 +36,13 @@ public class BlogController {
         this.blogService = blogService;
     }
 
-    @PostMapping("/add")
+    @PostMapping()
     public ResponseEntity<Integer> addNewBlog(@RequestBody NewBlog blog) {
         var blogId = blogDao.addNewBlog(blog.name(), blog.feedUrl());
         return new ResponseEntity<>(blogId, HttpStatus.CREATED);
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     public List<Blog> getBlogs(@RequestParam(value = "isSubscribed", defaultValue = "true") boolean isSubscribed) {
         return blogDao.getBlogs(isSubscribed);
     }
