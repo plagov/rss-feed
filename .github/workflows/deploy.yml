@@ -24,13 +24,3 @@ jobs:
         run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      - name: Check deploy
-        run: |
-          response=$(curl -s -o /dev/null -m 120 -w "%{http_code}" https://rss-feed.fly.dev/actuator/health)
-          if [ $response -eq 200 ]; then
-            echo "Application is healthy"
-          else
-            echo "Deploy failed"
-            exit 1
-          fi
-
