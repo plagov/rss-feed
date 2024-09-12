@@ -1,5 +1,3 @@
-import org.flywaydb.gradle.task.FlywayMigrateTask
-
 plugins {
     java
     id("org.springframework.boot") version "3.3.0"
@@ -41,17 +39,6 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-task("flywayMigrateLocal", FlywayMigrateTask::class) {
-    description = "Migrates the development database"
-    url = "jdbc:postgresql://localhost:5432/test"
-    user = "test"
-    password = "test"
-    locations = arrayOf(
-        "filesystem:src/main/resources/db/migration",
-        "filesystem:src/test/resources/flyway/migrations_local"
-    )
 }
 
 java {
