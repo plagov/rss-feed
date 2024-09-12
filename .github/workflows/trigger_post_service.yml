@@ -1,7 +1,7 @@
 name: Trigger post service
 on:
   schedule:
-    - cron: '0 */8 * * *'
+    - cron: '0 */20 * * *'
 jobs:
   make-request:
     runs-on: ubuntu-latest
