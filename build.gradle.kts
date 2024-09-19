@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.3.3"
+    id("org.springframework.boot") version "3.3.4"
     id("io.spring.dependency-management") version "1.1.6"
     id("org.flywaydb.flyway") version "10.18.0"
     id("com.github.ben-manes.versions") version "0.51.0"
