@@ -35,6 +35,8 @@ dependencies {
     implementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     implementation("org.junit.jupiter:junit-jupiter:5.11.0")
     implementation("com.github.java-json-tools:json-patch:1.13")
+    testImplementation("org.wiremock:wiremock-standalone:3.6.0")
+    testImplementation("io.rest-assured:rest-assured")
 }
 
 tasks.withType<Test> {
