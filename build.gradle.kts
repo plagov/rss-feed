@@ -33,7 +33,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql:10.20.0")
     implementation("org.testcontainers:postgresql:$testContainersVersion")
     implementation("org.testcontainers:junit-jupiter:$testContainersVersion")
-    implementation("org.junit.jupiter:junit-jupiter:5.11.2")
+    implementation("org.junit.jupiter:junit-jupiter:5.11.3")
     implementation("com.github.java-json-tools:json-patch:1.13")
 }
 
