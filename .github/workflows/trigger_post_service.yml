@@ -16,5 +16,5 @@ jobs:
 
       - name: Trigger post service
         run: |
-          response=$(curl -H "X-API-Token: ${{ secrets.API_TOKEN }}" -X POST https://rss-feed.fly.dev/posts/fetch-latest)
+          response=$(curl -H "X-API-Token: ${{ secrets.API_TOKEN }}" -X POST https://rss-feed.fly.dev/api/posts/fetch-latest)
           echo "Response from API: $response"
