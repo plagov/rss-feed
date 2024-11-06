@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>API Tokens</title>
+</head>
+<body>
+<h2>API Tokens</h2>
+
+<form th:action="@{/tokens}" method="post">
+    <input type="text" name="description" placeholder="Token description"/>
+    <button type="submit">Generate New Token</button>
+</form>
+
+<table>
+    <tr>
+        <th>Description</th>
+        <th>Token</th>
+        <th>Created At</th>
+    </tr>
+    <tr th:each="token : ${tokens}">
+        <td th:text="${token.description}"></td>
+        <td th:text="${token.token}"></td>
+        <td th:text="${token.createdAt}"></td>
+    </tr>
+</table>
+</body>
+</html>
