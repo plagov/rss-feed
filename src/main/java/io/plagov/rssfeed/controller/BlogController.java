@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping("/blogs")
+@RequestMapping("/api/blogs")
 public class BlogController {
 
     private final BlogDao blogDao;

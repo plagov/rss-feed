@@ -8,7 +8,7 @@ jobs:
     steps:
       - name: Request health check
         run: |
-          health_response=$(curl https://rss-feed.fly.dev/actuator/health)
+          health_response=$(curl -H "X-API-Token: ${{ secrets.API_TOKEN }}" https://rss-feed.fly.dev/actuator/health)
           echo "Health response: $health_response"
 
       - name: Wait for 30 seconds
@@ -16,5 +16,5 @@ jobs:
 
       - name: Trigger post service
         run: |
-          response=$(curl -X POST https://rss-feed.fly.dev/posts/fetch-latest)
+          response=$(curl -H "X-API-Token: ${{ secrets.API_TOKEN }}" -X POST https://rss-feed.fly.dev/posts/fetch-latest)
           echo "Response from API: $response"

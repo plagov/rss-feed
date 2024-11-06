@@ -28,4 +28,9 @@ public class PostsView {
         postDao.markPostAsRead(Integer.parseInt(id));
         return "redirect:/";
     }
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
 }
