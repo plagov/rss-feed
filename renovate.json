@@ -10,7 +10,7 @@
     {
       "customType": "regex",
       "fileMatch": ["^testcontainers-images.properties$"],
-      "matchStrings": ["database=?(?<depName>.*?):(?<currentValue>.*?)\n"],
+      "matchStrings": ["database=?(?<depName>.*?):(?<currentValue>.*?)\\n"],
       "datasourceTemplate": "docker"
     }
   ]
