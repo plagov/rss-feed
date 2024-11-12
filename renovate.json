@@ -11,7 +11,8 @@
       "customType": "regex",
       "fileMatch": ["^testcontainers-images.properties$"],
       "matchStrings": ["database=?(?<depName>.*?):(?<currentValue>.*?)\\n"],
-      "datasourceTemplate": "docker"
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
     }
   ]
 }
