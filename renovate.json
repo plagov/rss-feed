@@ -8,5 +8,12 @@
       "matchUpdateTypes": ["major", "minor", "patch", "pin", "digest"],
       "automerge": true
     }
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["^testcontainers-images.properties$"],
+      "matchStrings": ["database=?(?<depName>.*?):(?<currentValue>.*?)\n"],
+      "datasourceTemplate": "docker"
+    }
   ]
 }
