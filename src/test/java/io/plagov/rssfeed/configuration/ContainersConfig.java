@@ -9,15 +9,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
-@PropertySource("classpath:testcontainers-images.properties")
 public class ContainersConfig {
-
-    @Value("${database}")
-    private String databaseImage;
 
     @Bean
     @ServiceConnection
     public PostgreSQLContainer<?> postgreSQLContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse(databaseImage));
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:17.0"));
     }
 }

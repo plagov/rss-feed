@@ -5,14 +5,5 @@
       "matchUpdateTypes": ["major", "minor", "patch", "pin", "digest"],
       "automerge": true
     }
-  ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["^testcontainers-images.properties$"],
-      "matchStrings": ["database=?(?<depName>.*?):(?<currentValue>.*?)\\n"],
-      "datasourceTemplate": "docker",
-      "versioningTemplate": "docker"
-    }
   ]
 }
