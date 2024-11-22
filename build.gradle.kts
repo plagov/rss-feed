@@ -28,7 +28,7 @@ dependencies {
     implementation("org.springframework.security:spring-security-oauth2-jose")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    implementation("com.microsoft.playwright:playwright:1.48.0")
+    implementation("com.microsoft.playwright:playwright:1.49.0")
     implementation("com.rometools:rome:2.1.0")
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
