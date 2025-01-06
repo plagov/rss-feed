@@ -27,6 +27,7 @@ class PostViewTest {
     private int port;
 
     @Test
+    @WithMockOAuth2User
     @Sql("/sql/posts/add_posts.sql")
     void canViewTableOfUnreadPosts(Page page) {
         page.navigate("http://localhost:" + port);
