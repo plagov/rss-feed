@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import com.microsoft.playwright.junit.UsePlaywright;
 import io.plagov.rssfeed.configuration.ContainersConfig;
+import io.plagov.rssfeed.configuration.WithMockOAuth2User;
 import org.assertj.core.api.Assertions;
 import org.flywaydb.test.annotation.FlywayTest;
 import org.junit.jupiter.api.Test;
