@@ -22,8 +22,5 @@ jobs:
       - name: Build
         run: ./gradlew build -x test
 
-      - name: Install Playwright
-        run: ./gradlew playwrightInstall
-
       - name: Run tests
         run: ./gradlew test
