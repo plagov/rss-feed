@@ -1,8 +1,8 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.4.0"
-    id("io.spring.dependency-management") version "1.1.6"
-    id("org.flywaydb.flyway") version "11.0.0"
+    id("org.springframework.boot") version "3.4.1"
+    id("io.spring.dependency-management") version "1.1.7"
+    id("org.flywaydb.flyway") version "11.1.1"
     id("com.github.ben-manes.versions") version "0.51.0"
 }
 
@@ -33,10 +33,10 @@ dependencies {
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:10.0.0")
-    implementation("org.flywaydb:flyway-database-postgresql:11.0.0")
+    implementation("org.flywaydb:flyway-database-postgresql:11.1.1")
     implementation("org.testcontainers:postgresql:$testContainersVersion")
     implementation("org.testcontainers:junit-jupiter:$testContainersVersion")
-    implementation("org.junit.jupiter:junit-jupiter:5.11.3")
+    implementation("org.junit.jupiter:junit-jupiter:5.11.4")
     implementation("com.github.java-json-tools:json-patch:1.13")
 }
 
