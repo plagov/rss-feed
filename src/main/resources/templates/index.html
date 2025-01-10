@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" />
 
     <script src="/js/bootstrap.min.js" th:src="@{/js/bootstrap.min.js}"></script>
     <title>RSS Feed</title>
@@ -29,7 +29,7 @@
         <td><span th:text="${#temporals.format(post.dateAdded, 'yyyy-MM-dd')}">Date added</span></td>
         <td>
             <form method="post" th:action="@{/mark-as-read}">
-                <input type="hidden" th:value="${post.id}" name="id">
+                <input type="hidden" th:value="${post.id}" name="id" />
                 <button type="submit" class="btn btn-primary">Mark as read</button>
             </form>
         </td>

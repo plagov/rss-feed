@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -22,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 @SpringBootTest(classes = FakeClockConfiguration.class)
 @Import(ContainersConfig.class)
+@TestPropertySource(properties = "ALLOWED_USER_EMAIL = test@example.com")
 class PostTest {
 
     @Autowired
