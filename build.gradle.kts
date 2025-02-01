@@ -37,6 +37,7 @@ dependencies {
     implementation("com.github.java-json-tools:json-patch:1.13")
     testImplementation("org.wiremock:wiremock-standalone:3.6.0")
     testImplementation("io.rest-assured:rest-assured")
+    testImplementation("org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-14")
 }
 
 tasks.withType<Test> {
