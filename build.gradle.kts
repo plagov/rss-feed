@@ -33,7 +33,7 @@ dependencies {
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:10.0.0")
-    implementation("org.flywaydb:flyway-database-postgresql:11.3.2")
+    implementation("org.flywaydb:flyway-database-postgresql:11.3.3")
     implementation("org.testcontainers:postgresql:$testContainersVersion")
     implementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     implementation("org.junit.jupiter:junit-jupiter:5.11.4")
