@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Clock;
@@ -101,12 +102,32 @@ public class PostService {
 
     private List<SyndEntry> getEntriesFromFeed(Blog blog) {
         try {
-            return new SyndFeedInput().build(new InputSource(new URI(blog.feedUrl()).toURL().openStream()))
+            var uri = new URI(blog.feedUrl());
+            smokeTestTheConnection(uri);
+            return new SyndFeedInput().build(new InputSource(uri.toURL().openStream()))
                     .getEntries().stream().toList();
         } catch (FeedException | IOException | URISyntaxException exception) {
             var errorMessage = "An exception occurred while reading the feed for blog %s".formatted(blog.feedUrl());
             logger.error(errorMessage, exception);
             throw new RuntimeException(errorMessage);
         }
+    }
+
+    // TODO this is a temporary solution to see what blogs are bad
+    private void smokeTestTheConnection(URI feedUri) throws IOException {
+        var url = feedUri.toURL();
+        var connection = (HttpURLConnection) url.openConnection();
+        connection.setConnectTimeout(5000);
+        connection.setReadTimeout(5000);
+        connection.setRequestMethod("HEAD");
+
+        int responseCode = connection.getResponseCode();
+        String contentType = connection.getContentType();
+        if (responseCode != HttpURLConnection.HTTP_OK || !contentType.contains("xml")) {
+            logger.info("Feed not available for blog {}: Status={}, ContentType={}",
+                    feedUri, responseCode, contentType);
+        }
+
+        connection.disconnect();
     }
 }
