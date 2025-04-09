@@ -14,12 +14,10 @@ import org.springframework.stereotype.Component;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -40,7 +38,6 @@ public class PostService {
     public void recordLatestBlogPosts() {
         logger.info("Evaluate all blogs");
         var allBlogs = blogDao.getBlogs(true);
-        Collections.shuffle(allBlogs);
         allBlogs.forEach(this::recordLatestForBlog);
         logger.info("Finish evaluating blogs");
     }
@@ -103,7 +100,6 @@ public class PostService {
     private List<SyndEntry> getEntriesFromFeed(Blog blog) {
         try {
             var uri = new URI(blog.feedUrl());
-            smokeTestTheConnection(uri);
             return new SyndFeedInput().build(new InputSource(uri.toURL().openStream()))
                     .getEntries().stream().toList();
         } catch (FeedException | IOException | URISyntaxException exception) {
@@ -111,23 +107,5 @@ public class PostService {
             logger.error(errorMessage, exception);
             throw new RuntimeException(errorMessage);
         }
-    }
-
-    // TODO this is a temporary solution to see what blogs are bad
-    private void smokeTestTheConnection(URI feedUri) throws IOException {
-        var url = feedUri.toURL();
-        var connection = (HttpURLConnection) url.openConnection();
-        connection.setConnectTimeout(5000);
-        connection.setReadTimeout(5000);
-        connection.setRequestMethod("HEAD");
-
-        int responseCode = connection.getResponseCode();
-        String contentType = connection.getContentType();
-        if (responseCode != HttpURLConnection.HTTP_OK || !contentType.contains("xml")) {
-            logger.info("Feed not available for blog {}: Status={}, ContentType={}",
-                    feedUri, responseCode, contentType);
-        }
-
-        connection.disconnect();
     }
 }
