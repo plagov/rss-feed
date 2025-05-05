@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<nav th:fragment="navbar" class="bg-gradient-to-r from-indigo-600 to-purple-600 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <h1 class="text-white font-bold text-xl">RSS Feed Reader</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a th:href="@{/}"
+                           class="text-white hover:bg-indigo-500 hover:bg-opacity-75 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                           data-th-attr="data-testid='posts'">Posts</a>
+                        <a th:href="@{/blogs}"
+                           class="text-white hover:bg-indigo-500 hover:bg-opacity-75 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                           data-th-attr="data-testid='blogs'">Blogs</a>
+                        <a th:href="@{/tokens}"
+                           class="text-white hover:bg-indigo-500 hover:bg-opacity-75 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                           data-th-attr="data-testid='tokens'">Tokens</a>
+                    </div>
+                </div>
+            </div>
+            <div class="hidden md:block">
+                <div class="ml-4 flex items-center md:ml-6">
+                    <a th:href="@{/logout}"
+                       class="text-white bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

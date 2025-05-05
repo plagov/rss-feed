@@ -3,32 +3,37 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-    <link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"/>
-
-    <script src="/js/bootstrap.min.js" th:src="@{/js/bootstrap.min.js}"></script>
-    <title>RSS Feed</title>
+    <link rel="stylesheet" href="/css/output.css"/>
+    <title>Blogs - RSS Feed</title>
 </head>
-<body>
-<table class="table table-striped table-hover table-bordered table-responsive w-auto mx-auto">
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Feed URL</th>
-        <th>Unsubscribe</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="blog : ${blogs}" th:attr="data-testid=${'blog-' + blog.id}">
-        <td><span th:text="${blog.name}">Name</span></td>
-        <td><a th:text="${blog.feedUrl}" th:href="@{${blog.feedUrl}}" target="_blank">Feed URL</a></td>
-        <td>
-            <form method="post" th:action="@{/blogs/{id}/unsubscribe(id=${blog.id})}">
-                <button type="submit" class="btn btn-primary">Unsubscribe</button>
-            </form>
-        </td>
-    </tr>
-    </tbody>
-</table>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Include the navigation fragment -->
+    <div th:replace="fragments/navigation :: navbar"></div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Subscribed Blogs</h2>
+        
+        <div th:if="${blogs.isEmpty()}" class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-500">No subscribed blogs</p>
+        </div>
+        
+        <div th:unless="${blogs.isEmpty()}" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div th:each="blog : ${blogs}" class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" th:text="${blog.name}">Blog name</h3>
+                    <div class="mt-2 max-w-xl text-sm text-gray-500">
+                        <p>Feed URL: <a th:href="${blog.feedUrl}" th:text="${blog.feedUrl}" class="text-indigo-600 hover:text-indigo-900" target="_blank"></a></p>
+                    </div>
+                    <div class="mt-5">
+                        <form method="post" th:action="@{/blogs/{id}/unsubscribe(id=${blog.id})}">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                Unsubscribe
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

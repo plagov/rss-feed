@@ -1,19 +1,29 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" />
-
-    <script src="/js/bootstrap.min.js" th:src="@{/js/bootstrap.min.js}"></script>
-    <title>RSS Feed</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="/css/output.css"/>
+    <title>Access Denied - RSS Feed</title>
 </head>
-<body>
-<div>
-    <br/>
-    <p>You are not allowed to access this website!</p>
-    <br/>
-</div>
+<body class="bg-gray-50 min-h-screen">
+    <div class="min-h-screen flex flex-col items-center justify-center px-6">
+        <div class="max-w-md w-full bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-red-600 to-pink-600 px-4 py-5 sm:px-6">
+                <h2 class="text-xl leading-6 font-bold text-white">Access Denied</h2>
+            </div>
+            <div class="px-4 py-8 sm:p-8 text-center">
+                <div class="rounded-full bg-red-100 w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <p class="text-lg font-medium text-gray-900 mb-3" data-th-attr="data-testid='error-message'">You are not allowed to access this website!</p>
+                <a href="/logout" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Return to Login
+                </a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
