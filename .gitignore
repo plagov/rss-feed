@@ -5,6 +5,9 @@ build/
 !**/src/test/**/build/
 application-LOCAL.yml
 
+# Generated CSS
+src/main/resources/static/css/output.css
+
 ### STS ###
 .apt_generated
 .classpath
