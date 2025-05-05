@@ -17,7 +17,11 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 @TestPropertySource(properties = "ALLOWED_USER_EMAIL = test@example.com")
 @WebMvcTest(PostsView.class)
@@ -39,7 +43,8 @@ class PostViewTest {
                         .with(oauth2Login().attributes(attr -> attr.put("email", notAllowedEmail))))
                 .andExpect(status().isOk())
                 .andExpect(view().name("not_allowed"))
-                .andExpect(xpath("//body/div/p").string("You are not allowed to access this website!"));
+                .andExpect(xpath("//p[@data-testid='error-message']")
+                        .string("You are not allowed to access this website!"));
     }
 
     @Test
@@ -110,6 +115,18 @@ class PostViewTest {
                         .with(oauth2Login().attributes(attr -> attr.put("email", ALLOWED_EMAIL))))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("posts", List.of(post1)));
+    }
+
+    @Test
+    void shouldViewNavigationHeader() throws Exception {
+        mockMvc.perform(get("/")
+                .with(oauth2Login().attributes(attr -> attr.put("email", ALLOWED_EMAIL))))
+                .andExpect(xpath("//a[@data-testid='posts']").string("Posts"))
+                .andExpect(xpath("//a[@data-testid='posts']/@href").string("/"))
+                .andExpect(xpath("//a[@data-testid='blogs']").string("Blogs"))
+                .andExpect(xpath("//a[@data-testid='blogs']/@href").string("/blogs"))
+                .andExpect(xpath("//a[@data-testid='tokens']").string("Tokens"))
+                .andExpect(xpath("//a[@data-testid='tokens']/@href").string("/tokens"));
     }
 
     private PostResponse createTestPost() {
