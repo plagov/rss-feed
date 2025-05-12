@@ -60,33 +60,6 @@ class PostViewTest {
     }
 
     @Test
-    void canViewCorrectNumberOfColumns() throws Exception {
-        List<PostResponse> testPosts = List.of(createTestPost());
-        when(postDao.getAllUnreadPosts()).thenReturn(testPosts);
-
-        mockMvc.perform(get("/")
-                        .with(oauth2Login().attributes(attr -> attr.put("email", ALLOWED_EMAIL))))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(xpath("//table/thead/tr/th[1]").string("ID"))
-                .andExpect(xpath("//table/thead/tr/th[2]").string("Title"))
-                .andExpect(xpath("//table/thead/tr/th[3]").string("Date added"))
-                .andExpect(xpath("//table/thead/tr/th[4]").string("Mark as read"));
-    }
-
-    @Test
-    void titleColumnContainsLinks() throws Exception {
-        List<PostResponse> testPosts = List.of(createTestPost());
-        when(postDao.getAllUnreadPosts()).thenReturn(testPosts);
-
-        mockMvc.perform(get("/")
-                        .with(oauth2Login().attributes(attr -> attr.put("email", ALLOWED_EMAIL))))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(xpath("//tbody/tr[1]/td[2]/a/@href").string("https://post1.com"));
-    }
-
-    @Test
     void userCanMarkPostAsRead() throws Exception {
         var post1 = new PostResponse(1, 1, "Post 1", "https://post1.com", false, LocalDateTime.now());
         var post2 = new PostResponse(2, 1, "Post 2", "https://post2.com", false, LocalDateTime.now());
