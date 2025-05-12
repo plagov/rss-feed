@@ -3,6 +3,7 @@ module.exports = {
   theme: {
     extend: {},
   },
+  darkMode: 'media',
   plugins: [],
   minify: process.env.NODE_ENV === 'production'
 }

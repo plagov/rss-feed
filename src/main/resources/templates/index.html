@@ -6,49 +6,49 @@
     <link rel="stylesheet" href="/css/output.css"/>
     <title>RSS Feed</title>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
     <!-- Include the navigation fragment -->
     <div th:replace="fragments/navigation :: navbar"></div>
     
     <div class="max-w-7xl mx-auto px-4 py-6">
-        <h2 class="text-2xl font-bold mb-6">Recent Posts</h2>
+        <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Recent Posts</h2>
         
-        <div th:if="${posts.isEmpty()}" class="bg-white p-6 rounded-lg shadow-md">
-            <p class="text-gray-500">No posts available</p>
+        <div th:if="${posts.isEmpty()}" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <p class="text-gray-500 dark:text-gray-400">No posts available</p>
         </div>
         
         <div th:unless="${posts.isEmpty()}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- Card for each post -->
             <div th:each="post : ${posts}" 
                  th:attr="data-testid=${'post-' + post.id}" 
-                 class="bg-white rounded-lg shadow p-5">
+                 class="bg-white dark:bg-gray-800 rounded-lg shadow p-5 transition-colors duration-200">
                 
                 <!-- Post ID -->
                 <div class="mb-2">
-                    <span class="text-gray-500 text-xs mr-2">ID:</span>
-                    <span th:text="${post.id}" class="text-gray-700">ID</span>
+                    <span class="text-gray-500 dark:text-gray-400 text-xs mr-2">ID:</span>
+                    <span th:text="${post.id}" class="text-gray-700 dark:text-gray-300">ID</span>
                 </div>
                 
                 <!-- Post Title -->
                 <div class="mb-3">
-                    <span class="text-gray-500 text-xs block mb-1">Title:</span>
+                    <span class="text-gray-500 dark:text-gray-400 text-xs block mb-1">Title:</span>
                     <a th:text="${post.name}" 
                        th:href="@{${post.url}}" 
                        target="_blank" 
-                       class="text-indigo-600 hover:text-indigo-800 break-words">Title</a>
+                       class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 break-words">Title</a>
                 </div>
                 
                 <!-- Date Added -->
                 <div class="mb-4">
-                    <span class="text-gray-500 text-xs block mb-1">Date Added:</span>
+                    <span class="text-gray-500 dark:text-gray-400 text-xs block mb-1">Date Added:</span>
                     <span th:text="${#temporals.format(post.dateAdded, 'yyyy-MM-dd')}" 
-                          class="text-gray-700">Date added</span>
+                          class="text-gray-700 dark:text-gray-300">Date added</span>
                 </div>
                 
                 <!-- Mark as Read Button -->
                 <form method="post" th:action="@{/mark-as-read}">
                     <input type="hidden" th:value="${post.id}" name="id" />
-                    <button type="submit" class="w-full bg-indigo-50 text-indigo-600 py-2 rounded hover:bg-indigo-100">
+                    <button type="submit" class="w-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 py-2 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors duration-200">
                         Mark as read
                     </button>
                 </form>

@@ -6,27 +6,27 @@
     <link rel="stylesheet" href="/css/output.css"/>
     <title>Blogs - RSS Feed</title>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
     <!-- Include the navigation fragment -->
     <div th:replace="fragments/navigation :: navbar"></div>
     
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Subscribed Blogs</h2>
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Subscribed Blogs</h2>
         
-        <div th:if="${blogs.isEmpty()}" class="bg-white p-6 rounded-lg shadow-md">
-            <p class="text-gray-500">No subscribed blogs</p>
+        <div th:if="${blogs.isEmpty()}" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <p class="text-gray-500 dark:text-gray-400">No subscribed blogs</p>
         </div>
         
         <div th:unless="${blogs.isEmpty()}" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <div th:each="blog : ${blogs}" class="bg-white overflow-hidden shadow rounded-lg">
-                <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900" th:text="${blog.name}">Blog name</h3>
-                    <div class="mt-2 max-w-xl text-sm text-gray-500">
-                        <p>Feed URL: <a th:href="${blog.feedUrl}" th:text="${blog.feedUrl}" class="text-indigo-600 hover:text-indigo-900" target="_blank"></a></p>
+            <div th:each="blog : ${blogs}" class="bg-white dark:bg-gray-800 shadow rounded-lg">
+                <div class="p-5">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white" th:text="${blog.name}">Blog name</h3>
+                    <div class="mt-2 text-gray-500 dark:text-gray-400">
+                        <p>Feed URL: <a th:href="${blog.feedUrl}" th:text="${blog.feedUrl}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 break-words" target="_blank"></a></p>
                     </div>
                     <div class="mt-5">
                         <form method="post" th:action="@{/blogs/{id}/unsubscribe(id=${blog.id})}">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            <button type="submit" class="px-4 py-2 rounded-md text-white bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-600">
                                 Unsubscribe
                             </button>
                         </form>
