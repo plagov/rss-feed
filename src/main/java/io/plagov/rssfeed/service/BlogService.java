@@ -58,4 +58,8 @@ public class BlogService {
 
         patchBlog(blogId, jsonPatch);
     }
+
+    public void subscribeToNewBlog(String feedUrl, String name) {
+        blogDao.addNewBlog(feedUrl, name);
+    }
 }

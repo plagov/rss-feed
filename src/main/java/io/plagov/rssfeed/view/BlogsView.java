@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class BlogsView {
@@ -26,6 +27,12 @@ public class BlogsView {
     @PostMapping("/blogs/{id}/unsubscribe")
     public String unsubscribeFromBlog(@PathVariable int id) {
         blogService.unsubscribeFromBlog(id);
+        return "redirect:/blogs";
+    }
+
+    @PostMapping("/blogs")
+    public String subscribeToNewBlog(@RequestParam String feedUrl, @RequestParam String name) {
+        blogService.subscribeToNewBlog(feedUrl, name);
         return "redirect:/blogs";
     }
 }
