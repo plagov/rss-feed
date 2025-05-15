@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="/css/output.css"/>
+    <title>Subscribe to Blog - RSS Feed</title>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div th:replace="fragments/navigation :: navbar"></div>
+    
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Subscribe to New Blog</h2>
+        
+        <div class="max-w-2xl bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <form method="post" th:action="@{/blogs}">
+                <div class="mb-4">
+                    <label for="name" class="block text-gray-700 dark:text-gray-300 mb-2">Blog Name</label>
+                    <input type="text" id="name" name="name" required
+                           class="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:text-white"
+                           placeholder="Enter blog name">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="feedUrl" class="block text-gray-700 dark:text-gray-300 mb-2">Feed URL</label>
+                    <input type="url" id="feedUrl" name="feedUrl" required
+                           class="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:text-white"
+                           placeholder="https://example.com/feed.xml">
+                </div>
+                
+                <div class="flex items-center">
+                    <button type="submit"
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md">
+                        Subscribe
+                    </button>
+                    <a th:href="@{/blogs}"
+                       class="ml-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
