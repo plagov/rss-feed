@@ -12,7 +12,9 @@
     <div class="max-w-7xl mx-auto px-4 py-6">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Subscribed Blogs</h2>
-            <a th:href="@{/blogs/subscribe}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md">
+            <a th:href="@{/blogs/subscribe}"
+               class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md"
+               data-th-attr="data-testid='subscribe-button'">
                 Subscribe to a new blog
             </a>
         </div>
@@ -22,11 +24,18 @@
         </div>
         
         <div th:unless="${blogs.isEmpty()}" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <div th:each="blog : ${blogs}" class="bg-white dark:bg-gray-800 shadow rounded-lg">
+            <div th:each="blog : ${blogs}" class="bg-white dark:bg-gray-800 shadow rounded-lg" data-th-attr="data-testclass='blog-card'">
                 <div class="p-5">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white" th:text="${blog.name}">Blog name</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white"
+                        th:text="${blog.name}"
+                        data-th-attr="data-testclass='blog-name'">Blog name</h3>
                     <div class="mt-2 text-gray-500 dark:text-gray-400">
-                        <p>Feed URL: <a th:href="${blog.feedUrl}" th:text="${blog.feedUrl}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 break-words" target="_blank"></a></p>
+                        <p>Feed URL: <a
+                                th:href="${blog.feedUrl}"
+                                th:text="${blog.feedUrl}"
+                                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 break-words"
+                                target="_blank"
+                                data-th-attr="data-testclass='blog-url'"></a></p>
                     </div>
                     <div class="mt-5">
                         <form method="post" th:action="@{/blogs/{id}/unsubscribe(id=${blog.id})}">
