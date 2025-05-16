@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class BlogDao {
@@ -31,10 +30,12 @@ public class BlogDao {
                 .list();
     }
 
-    public int addNewBlog(String blogName, String feedUrl) {
-        return simpleJdbcInsert
-                .executeAndReturnKey(Map.of("name", blogName, "feed_url", feedUrl, "is_subscribed", true))
-                .intValue();
+    public void addNewBlog(String feedUrl, String blogName) {
+        var query = "INSERT INTO blogs (name, feed_url, is_subscribed) VALUES (?, ?, ?);";
+        jdbcClient
+                .sql(query)
+                .params(blogName, feedUrl, true)
+                .update();
     }
 
     public void updateBlog(int blogId, String blogName, String feedUrl, boolean isSubscribed) {
