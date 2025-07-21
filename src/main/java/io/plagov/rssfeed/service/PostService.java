@@ -16,7 +16,9 @@ import org.xml.sax.InputSource;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -107,5 +109,10 @@ public class PostService {
             logger.error(errorMessage, exception);
             throw new RuntimeException(errorMessage);
         }
+    }
+
+    public void markPostAsRead(String postId) {
+        var now = Timestamp.from(Instant.now());
+        postDao.markPostAsRead(Integer.parseInt(postId), now);
     }
 }

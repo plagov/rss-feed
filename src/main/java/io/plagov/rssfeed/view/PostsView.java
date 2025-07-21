@@ -1,6 +1,7 @@
 package io.plagov.rssfeed.view;
 
 import io.plagov.rssfeed.dao.PostDao;
+import io.plagov.rssfeed.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,14 +17,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class PostsView {
 
     private final PostDao postDao;
+    private final PostService postService;
 
     private final Logger logger = LoggerFactory.getLogger(PostsView.class);
 
     @Value("${ALLOWED_USER_EMAIL}")
     private String allowedUserEmail;
 
-    public PostsView(PostDao postDao) {
+    public PostsView(PostDao postDao, PostService postService) {
         this.postDao = postDao;
+        this.postService = postService;
     }
 
     @GetMapping("/")
@@ -39,7 +42,7 @@ public class PostsView {
 
     @PostMapping("/mark-as-read")
     public String markPostAsRead(@RequestParam String id) {
-        postDao.markPostAsRead(Integer.parseInt(id));
+        postService.markPostAsRead(id);
         return "redirect:/";
     }
 
