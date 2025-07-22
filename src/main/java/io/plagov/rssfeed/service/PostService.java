@@ -115,4 +115,8 @@ public class PostService {
         var now = Timestamp.from(Instant.now());
         postDao.markPostAsRead(Integer.parseInt(postId), now);
     }
+
+    public void deleteReadPostsOlderThan30Days() {
+        postDao.deleteReadPostsOlderThanDays(30);
+    }
 }
