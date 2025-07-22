@@ -112,7 +112,7 @@ public class PostService {
     }
 
     public void markPostAsRead(String postId) {
-        var now = Timestamp.from(Instant.now());
+        var now = Timestamp.from(Instant.now(clock));
         postDao.markPostAsRead(Integer.parseInt(postId), now);
     }
 
