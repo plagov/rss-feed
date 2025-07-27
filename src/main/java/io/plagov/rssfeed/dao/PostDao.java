@@ -65,7 +65,7 @@ public class PostDao {
     }
 
     public void deleteReadPostsOlderThanDays(int days) {
-        var query = "DELETE from posts WHERE is_read IS TRUE AND date_read < NOW() - INTERVAL '? days'";
+        var query = "DELETE from posts WHERE is_read IS TRUE AND date_read < NOW() - make_interval(days => ?)";
         jdbcClient
                 .sql(query)
                 .param(days)
