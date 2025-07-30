@@ -2,6 +2,7 @@ package io.plagov.rssfeed.view;
 
 import io.plagov.rssfeed.dao.PostDao;
 import io.plagov.rssfeed.domain.response.PostResponse;
+import io.plagov.rssfeed.service.PostService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -32,6 +33,9 @@ class PostViewTest {
 
     @MockitoBean
     private PostDao postDao;
+
+    @MockitoBean
+    private PostService postService;
 
     private static final String ALLOWED_EMAIL = "test@example.com";
 

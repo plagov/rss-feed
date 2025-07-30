@@ -3,6 +3,7 @@ package io.plagov.rssfeed.controller;
 import io.plagov.rssfeed.dao.PostDao;
 import io.plagov.rssfeed.domain.response.PostResponse;
 import io.plagov.rssfeed.service.PostService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,5 +33,11 @@ public class PostController {
     public String fetchLatestPosts() {
         CompletableFuture.runAsync(postService::recordLatestBlogPosts);
         return "Fetching latest posts task is triggered";
+    }
+
+    @PostMapping("/cleanup")
+    public ResponseEntity<Void> cleanupReadPosts() {
+        postService.deleteReadPostsOlderThan30Days();
+        return ResponseEntity.ok().build();
     }
 }

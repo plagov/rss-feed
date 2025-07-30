@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -55,8 +56,19 @@ public class PostDao {
         return jdbcClient.sql(sql).query(mapToPost()).list();
     }
 
-    public void markPostAsRead(int postId) {
-        var sql = "UPDATE posts SET is_read = TRUE WHERE id = ?";
-        jdbcClient.sql(sql).param(postId).update();
+    public void markPostAsRead(int postId, Timestamp dateRead) {
+        var sql = "UPDATE posts SET is_read = TRUE, date_read = ? WHERE id = ?";
+        jdbcClient
+                .sql(sql)
+                .params(dateRead, postId)
+                .update();
+    }
+
+    public void deleteReadPostsOlderThanDays(int days) {
+        var query = "DELETE from posts WHERE is_read IS TRUE AND date_read < NOW() - make_interval(days => ?)";
+        jdbcClient
+                .sql(query)
+                .param(days)
+                .update();
     }
 }

@@ -14,6 +14,11 @@ jobs:
       - name: Wait for 30 seconds
         run: sleep 30s
 
+      - name: Delete read posts older than 30 days
+        run: |
+          response=$(curl -H "X-API-Token: ${{ secrets.API_TOKEN }}" -X POST https://rss-feed.fly.dev/api/posts/cleanup)
+          echo "Response from API: $response"
+
       - name: Trigger post service
         run: |
           response=$(curl -H "X-API-Token: ${{ secrets.API_TOKEN }}" -X POST https://rss-feed.fly.dev/api/posts/fetch-latest)
