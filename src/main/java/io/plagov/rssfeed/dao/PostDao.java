@@ -51,7 +51,7 @@ public class PostDao {
                 .update();
     }
 
-    public List<PostResponse> getAllUnreadPosts() {
+    public List<PostResponse> getUnreadPosts() {
         var sql = "SELECT * FROM posts WHERE is_read = FALSE";
         return jdbcClient.sql(sql).query(mapToPost()).list();
     }

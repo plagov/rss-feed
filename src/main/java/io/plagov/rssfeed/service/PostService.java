@@ -119,4 +119,8 @@ public class PostService {
     public void deleteReadPostsOlderThan30Days() {
         postDao.deleteReadPostsOlderThanDays(30);
     }
+
+    public List<PostResponse> getUnreadPosts() {
+        return postDao.getUnreadPosts();
+    }
 }
