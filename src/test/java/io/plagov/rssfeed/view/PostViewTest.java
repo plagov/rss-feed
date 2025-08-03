@@ -1,6 +1,5 @@
 package io.plagov.rssfeed.view;
 
-import io.plagov.rssfeed.dao.PostDao;
 import io.plagov.rssfeed.domain.response.PostResponse;
 import io.plagov.rssfeed.service.PostService;
 import org.junit.jupiter.api.Test;
@@ -32,9 +31,6 @@ class PostViewTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private PostDao postDao;
-
-    @MockitoBean
     private PostService postService;
 
     private static final String ALLOWED_EMAIL = "test@example.com";
@@ -54,7 +50,7 @@ class PostViewTest {
     @Test
     void canViewTableOfUnreadPosts() throws Exception {
         List<PostResponse> testPosts = List.of(createTestPost());
-        when(postDao.getAllUnreadPosts()).thenReturn(testPosts);
+        when(postService.getUnreadPosts()).thenReturn(testPosts);
 
         mockMvc.perform(get("/")
                         .with(oauth2Login().attributes(attr -> attr.put("email", ALLOWED_EMAIL))))
@@ -69,7 +65,7 @@ class PostViewTest {
         var post2 = new PostResponse(2, 1, "Post 2", "https://post2.com", false, LocalDateTime.now());
         var initialPosts = List.of(post1, post2);
 
-        when(postDao.getAllUnreadPosts())
+        when(postService.getUnreadPosts())
                 .thenReturn(initialPosts)
                 .thenReturn(List.of(post1));
 

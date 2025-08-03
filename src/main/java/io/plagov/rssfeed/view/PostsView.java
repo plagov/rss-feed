@@ -1,9 +1,6 @@
 package io.plagov.rssfeed.view;
 
-import io.plagov.rssfeed.dao.PostDao;
 import io.plagov.rssfeed.service.PostService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -16,16 +13,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class PostsView {
 
-    private final PostDao postDao;
     private final PostService postService;
-
-    private final Logger logger = LoggerFactory.getLogger(PostsView.class);
 
     @Value("${ALLOWED_USER_EMAIL}")
     private String allowedUserEmail;
 
-    public PostsView(PostDao postDao, PostService postService) {
-        this.postDao = postDao;
+    public PostsView(PostService postService) {
         this.postService = postService;
     }
 
@@ -35,7 +28,7 @@ public class PostsView {
         if (!email.equals(allowedUserEmail)) {
             return "not_allowed";
         }
-        var posts = postDao.getAllUnreadPosts();
+        var posts = postService.getUnreadPosts();
         model.addAttribute("posts", posts);
         return "index";
     }

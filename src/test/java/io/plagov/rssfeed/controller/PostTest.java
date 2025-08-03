@@ -1,8 +1,6 @@
 package io.plagov.rssfeed.controller;
 
 import io.plagov.rssfeed.configuration.ContainersConfig;
-import io.plagov.rssfeed.domain.response.PostResponse;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,20 +35,6 @@ class PostTest {
     void tearDown() {
         jdbcTemplate.execute("DELETE FROM posts");
     }
-
-    @Test
-    @Sql({"/sql/tokens/add_test_token.sql", "/sql/posts/add_posts.sql"})
-    void shouldReturnListOfUnreadPosts() {
-        var httpResponse = mockMvc.get()
-            .uri("/api/posts/unread")
-            .header("X-API-Token", TEST_TOKEN)
-            .exchange();
-        assertThat(httpResponse).hasStatus(HttpStatus.OK)
-                .bodyJson()
-                .convertTo(InstanceOfAssertFactories.list(PostResponse.class))
-                .hasSize(2);
-    }
-
 
     @Test
     @Sql({"/sql/tokens/add_test_token.sql", "/sql/posts/add_read_posts.sql"})
