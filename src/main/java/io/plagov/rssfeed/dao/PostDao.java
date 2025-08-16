@@ -52,7 +52,7 @@ public class PostDao {
     }
 
     public List<PostResponse> getUnreadPosts() {
-        var sql = "SELECT * FROM posts WHERE is_read = FALSE";
+        var sql = "SELECT * FROM posts WHERE is_read = FALSE ORDER BY date_added ASC";
         return jdbcClient.sql(sql).query(mapToPost()).list();
     }
 
