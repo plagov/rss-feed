@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21.0.5_11-jdk-alpine
+FROM bellsoft/liberica-runtime-container:jre-24.0.2_12-musl
 VOLUME /tmp
 COPY build/libs/*.jar app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
