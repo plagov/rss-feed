@@ -1,4 +1,4 @@
 {
   "extends": ["config:base"],
-  "schedule": ["on friday"]
+  "schedule": ["* 0-5 * * 5"]
 }
