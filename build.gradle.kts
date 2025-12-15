@@ -26,10 +26,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-security-oauth2-client")
-    implementation("org.springframework.security:spring-security-oauth2-jose")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-starter-security-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-security-oauth2-client-test")
     testImplementation("org.springframework.boot:spring-boot-starter-jdbc-test")
     testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")
     implementation("com.rometools:rome:2.1.0")
@@ -39,7 +37,7 @@ dependencies {
     implementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:10.0.0")
     implementation("org.testcontainers:postgresql:$testContainersVersion")
     implementation("org.testcontainers:junit-jupiter:$testContainersVersion")
-    implementation("org.junit.jupiter:junit-jupiter:6.0.1")
+    implementation("org.junit.jupiter:junit-jupiter")
 }
 
 tasks.withType<Test> {
