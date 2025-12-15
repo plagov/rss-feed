@@ -1,14 +1,14 @@
 package io.plagov.rssfeed.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.plagov.rssfeed.dao.BlogDao;
 import io.plagov.rssfeed.domain.Blog;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,7 +32,7 @@ public class BlogService {
         try {
             patchedJsonNode = patch.apply(jsonNode);
             patchedBlog = objectMapper.treeToValue(patchedJsonNode, Blog.class);
-        } catch (JsonPatchException | JsonProcessingException e) {
+        } catch (JsonPatchException | JacksonException e) {
             throw new RuntimeException(e);
         }
         blogDao.updateBlog(blogId, patchedBlog.name(), patchedBlog.feedUrl(), patchedBlog.isSubscribed());
