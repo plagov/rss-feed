@@ -6,7 +6,7 @@ plugins {
     id("com.github.ben-manes.versions") version "0.53.0"
 }
 
-val testContainersVersion = "1.21.3"
+val testContainersVersion = "1.21.4"
 
 group = "io.plagov"
 version = "0.0.1-SNAPSHOT"
