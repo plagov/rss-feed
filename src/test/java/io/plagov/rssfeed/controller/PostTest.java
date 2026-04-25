@@ -19,7 +19,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 @SpringBootTest
 @Import(ContainersConfig.class)
-@TestPropertySource(properties = "ALLOWED_USER_EMAIL = test@example.com")
+@TestPropertySource(properties = {
+        "app.jwt.secret=12345678901234567890123456789012",
+        "app.jwt.issuer=test-issuer",
+        "app.jwt.audience=test-audience",
+        "app.jwt.expiration-minutes=60"
+})
 @AutoConfigureMockMvc
 class PostTest {
 
