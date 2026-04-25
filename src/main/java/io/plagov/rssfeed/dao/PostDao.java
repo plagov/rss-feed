@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class PostDao {
@@ -56,11 +57,46 @@ public class PostDao {
         return jdbcClient.sql(sql).query(mapToPost()).list();
     }
 
+    public List<PostResponse> getUnreadPostsForUser(UUID userId) {
+        var sql = """
+                SELECT p.*
+                FROM posts p
+                JOIN blogs b ON p.blog_id = b.id
+                WHERE p.is_read = FALSE
+                  AND (b.user_id = :userId OR b.user_id IS NULL)
+                ORDER BY p.date_added ASC
+                """;
+        return jdbcClient
+                .sql(sql)
+                .param("userId", userId)
+                .query(mapToPost())
+                .list();
+    }
+
     public void markPostAsRead(int postId, Timestamp dateRead) {
         var sql = "UPDATE posts SET is_read = TRUE, date_read = ? WHERE id = ?";
         jdbcClient
                 .sql(sql)
                 .params(dateRead, postId)
+                .update();
+    }
+
+    public void markPostAsReadForUser(int postId, Timestamp dateRead, UUID userId) {
+        var sql = """
+                UPDATE posts p
+                SET is_read = :isRead,
+                    date_read = :dateRead
+                FROM blogs b
+                WHERE p.blog_id = b.id
+                  AND p.id = :postId
+                  AND (b.user_id = :userId OR b.user_id IS NULL)
+                """;
+        jdbcClient
+                .sql(sql)
+                .param("isRead", true)
+                .param("dateRead", dateRead)
+                .param("postId", postId)
+                .param("userId", userId)
                 .update();
     }
 

@@ -10,21 +10,24 @@ import java.util.List;
 public class BlogService {
 
     private final BlogDao blogDao;
+    private final UserContextService userContextService;
 
-    public BlogService(BlogDao blogDao) {
+    public BlogService(BlogDao blogDao, UserContextService userContextService) {
         this.blogDao = blogDao;
+        this.userContextService = userContextService;
     }
 
     public List<Blog> getSubscribedBlogs() {
-        return blogDao.getBlogs(true);
+        return blogDao.getBlogsForUser(true, userContextService.getCurrentUserId());
     }
 
     public void unsubscribeFromBlog(int blogId) {
-        var blogEntity = blogDao.getBlog(blogId);
-        blogDao.updateBlog(blogId, blogEntity.name(), blogEntity.feedUrl(), false);
+        var userId = userContextService.getCurrentUserId();
+        var blogEntity = blogDao.getBlogForUser(blogId, userId);
+        blogDao.updateBlogForUser(blogId, blogEntity.name(), blogEntity.feedUrl(), false, userId);
     }
 
     public void subscribeToNewBlog(String feedUrl, String name) {
-        blogDao.addNewBlog(feedUrl, name);
+        blogDao.addNewBlogForUser(feedUrl, name, userContextService.getCurrentUserId());
     }
 }

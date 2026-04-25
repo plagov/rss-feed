@@ -4,11 +4,10 @@ spring:
     username: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
-  security:
-    oauth2:
-      client:
-        registration:
-          github:
-            client-id: ${GITHUB_OAUTH_CLIENT_ID}
-            client-secret: ${GITHUB_OAUTH_CLIENT_SECRET}
-            redirect-uri: "https://rss-feed.fly.dev/login/oauth2/code/github"
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    issuer: ${JWT_ISSUER:rss-feed}
+    audience: ${JWT_AUDIENCE:rss-feed-client}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}

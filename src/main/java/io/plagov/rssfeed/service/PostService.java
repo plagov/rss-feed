@@ -29,12 +29,14 @@ public class PostService {
     private final BlogDao blogDao;
     private final PostDao postDao;
     private final Clock clock;
+    private final UserContextService userContextService;
     private final Logger logger = LoggerFactory.getLogger(PostService.class);
 
-    public PostService(BlogDao blogDao, PostDao postDao, Clock clock) {
+    public PostService(BlogDao blogDao, PostDao postDao, Clock clock, UserContextService userContextService) {
         this.blogDao = blogDao;
         this.postDao = postDao;
         this.clock = clock;
+        this.userContextService = userContextService;
     }
 
     public void recordLatestBlogPosts() {
@@ -113,7 +115,7 @@ public class PostService {
 
     public void markPostAsRead(String postId) {
         var now = Timestamp.from(Instant.now(clock));
-        postDao.markPostAsRead(Integer.parseInt(postId), now);
+        postDao.markPostAsReadForUser(Integer.parseInt(postId), now, userContextService.getCurrentUserId());
     }
 
     public void deleteReadPostsOlderThan30Days() {
@@ -121,6 +123,6 @@ public class PostService {
     }
 
     public List<PostResponse> getUnreadPosts() {
-        return postDao.getUnreadPosts();
+        return postDao.getUnreadPostsForUser(userContextService.getCurrentUserId());
     }
 }
