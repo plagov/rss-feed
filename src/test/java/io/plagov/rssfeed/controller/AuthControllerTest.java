@@ -42,7 +42,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void shouldRegisterAndLoginFirstUser() throws Exception {
+    void shouldRegisterAndLoginUser() throws Exception {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(APPLICATION_JSON)
                         .content("""
@@ -72,7 +72,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void shouldRejectSecondRegistration() throws Exception {
+    void shouldAllowSecondRegistrationForDifferentUsername() throws Exception {
         var request = """
                 {
                   "username": "admin",
@@ -95,6 +95,28 @@ class AuthControllerTest {
                                   "email": "test2@example.com"
                                 }
                                 """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.username").value("another-admin"));
+    }
+
+    @Test
+    void shouldRejectDuplicateUsername() throws Exception {
+        var request = """
+                {
+                  "username": "admin",
+                  "password": "Password123!",
+                  "email": "test@example.com"
+                }
+                """;
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(APPLICATION_JSON)
+                        .content(request))
                 .andExpect(status().isConflict());
     }
 }

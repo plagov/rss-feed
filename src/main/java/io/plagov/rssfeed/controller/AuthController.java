@@ -36,7 +36,7 @@ public class AuthController {
 
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public String handleRegistrationClosed(IllegalStateException exception) {
+    public String handleConflict(IllegalStateException exception) {
         return exception.getMessage();
     }
 

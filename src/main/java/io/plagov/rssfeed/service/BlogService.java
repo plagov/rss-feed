@@ -2,32 +2,31 @@ package io.plagov.rssfeed.service;
 
 import io.plagov.rssfeed.dao.BlogDao;
 import io.plagov.rssfeed.domain.Blog;
+import io.plagov.rssfeed.domain.request.NewBlog;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class BlogService {
 
     private final BlogDao blogDao;
-    private final UserContextService userContextService;
 
-    public BlogService(BlogDao blogDao, UserContextService userContextService) {
+    public BlogService(BlogDao blogDao) {
         this.blogDao = blogDao;
-        this.userContextService = userContextService;
     }
 
-    public List<Blog> getSubscribedBlogs() {
-        return blogDao.getBlogsForUser(true, userContextService.getCurrentUserId());
+    public List<Blog> getSubscribedBlogs(UUID userId) {
+        return blogDao.getBlogsForUser(true, userId);
     }
 
-    public void unsubscribeFromBlog(int blogId) {
-        var userId = userContextService.getCurrentUserId();
+    public void unsubscribeFromBlog(int blogId, UUID userId) {
         var blogEntity = blogDao.getBlogForUser(blogId, userId);
         blogDao.updateBlogForUser(blogId, blogEntity.name(), blogEntity.feedUrl(), false, userId);
     }
 
-    public void subscribeToNewBlog(String feedUrl, String name) {
-        blogDao.addNewBlogForUser(feedUrl, name, userContextService.getCurrentUserId());
+    public void subscribeToNewBlog(NewBlog newBlog, UUID userId) {
+        blogDao.addNewBlogForUser(newBlog.feedUrl(), newBlog.name(), userId);
     }
 }
