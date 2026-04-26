@@ -21,6 +21,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 @Component
@@ -29,32 +30,30 @@ public class PostService {
     private final BlogDao blogDao;
     private final PostDao postDao;
     private final Clock clock;
-    private final UserContextService userContextService;
     private final Logger logger = LoggerFactory.getLogger(PostService.class);
 
-    public PostService(BlogDao blogDao, PostDao postDao, Clock clock, UserContextService userContextService) {
+    public PostService(BlogDao blogDao, PostDao postDao, Clock clock) {
         this.blogDao = blogDao;
         this.postDao = postDao;
         this.clock = clock;
-        this.userContextService = userContextService;
     }
 
-    public void recordLatestBlogPosts() {
+    public void recordLatestBlogPosts(UUID userId) {
         logger.info("Evaluate all blogs");
-        var allBlogs = blogDao.getBlogs(true);
+        var allBlogs = blogDao.getBlogsForUser(true, userId);
         allBlogs.forEach(this::recordLatestForBlog);
         logger.info("Finish evaluating blogs");
     }
 
-    public void recordLatestPostsForBlog(int blogId) {
-        var blog = blogDao.getBlog(blogId);
+    public void recordLatestPostsForBlog(int blogId, UUID userId) {
+        var blog = blogDao.getBlogForUser(blogId, userId);
         recordLatestForBlog(blog);
         logger.info("Finish evaluating blog {}", blog.name());
     }
 
     private void recordLatestForBlog(Blog blog) {
         logger.info("Evaluate blog {}", blog.name());
-        var latestSavedPost = postDao.getLatestPostForBlog(blog.name());
+        var latestSavedPost = postDao.getLatestPostForBlog(blog.id());
         var allEntries = getEntriesFromFeed(blog);
 
         if (latestSavedPost.isEmpty()) {
@@ -113,16 +112,16 @@ public class PostService {
         }
     }
 
-    public void markPostAsRead(String postId) {
+    public void markPostAsRead(int postId, UUID userId) {
         var now = Timestamp.from(Instant.now(clock));
-        postDao.markPostAsReadForUser(Integer.parseInt(postId), now, userContextService.getCurrentUserId());
+        postDao.markPostAsReadForUser(postId, now, userId);
     }
 
-    public void deleteReadPostsOlderThan30Days() {
-        postDao.deleteReadPostsOlderThanDays(30);
+    public void deleteReadPostsOlderThan30Days(UUID userId) {
+        postDao.deleteReadPostsOlderThanDaysForUser(30, userId);
     }
 
-    public List<PostResponse> getUnreadPosts() {
-        return postDao.getUnreadPostsForUser(userContextService.getCurrentUserId());
+    public List<PostResponse> getUnreadPosts(UUID userId) {
+        return postDao.getUnreadPostsForUser(userId);
     }
 }

@@ -1,9 +1,7 @@
 package io.plagov.rssfeed.dao;
 
 import io.plagov.rssfeed.domain.Blog;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,31 +10,10 @@ import java.util.UUID;
 @Component
 public class BlogDao {
 
-    private final SimpleJdbcInsert simpleJdbcInsert;
     private final JdbcClient jdbcClient;
 
-    public BlogDao(JdbcTemplate jdbcTemplate, JdbcClient jdbcClient) {
-        this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("blogs")
-                .usingGeneratedKeyColumns("id");
+    public BlogDao(JdbcClient jdbcClient) {
         this.jdbcClient = jdbcClient;
-    }
-
-    public List<Blog>  getBlogs(boolean isSubscribed) {
-        var query = "SELECT * FROM blogs WHERE is_subscribed = ?";
-        return jdbcClient
-                .sql(query)
-                .params(isSubscribed)
-                .query(Blog.class)
-                .list();
-    }
-
-    public void addNewBlog(String feedUrl, String blogName) {
-        var query = "INSERT INTO blogs (name, feed_url, is_subscribed) VALUES (?, ?, ?);";
-        jdbcClient
-                .sql(query)
-                .params(blogName, feedUrl, true)
-                .update();
     }
 
     public List<Blog> getBlogsForUser(boolean isSubscribed, UUID userId) {
@@ -44,7 +21,8 @@ public class BlogDao {
                 SELECT *
                 FROM blogs
                 WHERE is_subscribed = :isSubscribed
-                  AND (user_id = :userId OR user_id IS NULL)
+                  AND user_id = :userId
+                ORDER BY id
                 """;
         return jdbcClient
                 .sql(query)
@@ -62,29 +40,12 @@ public class BlogDao {
                 .update();
     }
 
-    public void updateBlog(int blogId, String blogName, String feedUrl, boolean isSubscribed) {
-        var sql = "UPDATE blogs SET name = ?, feed_url = ?, is_subscribed = ? WHERE id = ?";
-        jdbcClient
-                .sql(sql)
-                .params(blogName, feedUrl, isSubscribed, blogId)
-                .update();
-    }
-
-    public Blog getBlog(int blogId) {
-        var sql = "SELECT * FROM blogs WHERE id = ?";
-        return jdbcClient
-                .sql(sql)
-                .params(blogId)
-                .query(Blog.class)
-                .single();
-    }
-
     public Blog getBlogForUser(int blogId, UUID userId) {
         var sql = """
                 SELECT *
                 FROM blogs
                 WHERE id = :blogId
-                  AND (user_id = :userId OR user_id IS NULL)
+                  AND user_id = :userId
                 """;
         return jdbcClient
                 .sql(sql)
@@ -99,10 +60,9 @@ public class BlogDao {
                 UPDATE blogs
                 SET name = :blogName,
                     feed_url = :feedUrl,
-                    is_subscribed = :isSubscribed,
-                    user_id = COALESCE(user_id, :userId)
+                    is_subscribed = :isSubscribed
                 WHERE id = :blogId
-                  AND (user_id = :userId OR user_id IS NULL)
+                  AND user_id = :userId
                 """;
         jdbcClient
                 .sql(sql)

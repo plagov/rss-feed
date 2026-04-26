@@ -21,16 +21,15 @@ public class PostDao {
         this.jdbcClient = jdbcClient;
     }
 
-    public Optional<PostResponse> getLatestPostForBlog(String blogName) {
+    public Optional<PostResponse> getLatestPostForBlog(int blogId) {
         var sql = """
                 SELECT p.*
                 FROM posts p
-                JOIN blogs b ON p.blog_id = b.id
-                WHERE b.name = :blogName
+                WHERE p.blog_id = :blogId
                 ORDER BY p.id DESC
                 LIMIT 1;""";
 
-        return jdbcClient.sql(sql).param("blogName", blogName).query(mapToPost()).optional();
+        return jdbcClient.sql(sql).param("blogId", blogId).query(mapToPost()).optional();
     }
 
     private static RowMapper<PostResponse> mapToPost() {
@@ -52,18 +51,13 @@ public class PostDao {
                 .update();
     }
 
-    public List<PostResponse> getUnreadPosts() {
-        var sql = "SELECT * FROM posts WHERE is_read = FALSE ORDER BY date_added ASC";
-        return jdbcClient.sql(sql).query(mapToPost()).list();
-    }
-
     public List<PostResponse> getUnreadPostsForUser(UUID userId) {
         var sql = """
                 SELECT p.*
                 FROM posts p
                 JOIN blogs b ON p.blog_id = b.id
                 WHERE p.is_read = FALSE
-                  AND (b.user_id = :userId OR b.user_id IS NULL)
+                  AND b.user_id = :userId
                 ORDER BY p.date_added ASC
                 """;
         return jdbcClient
@@ -71,14 +65,6 @@ public class PostDao {
                 .param("userId", userId)
                 .query(mapToPost())
                 .list();
-    }
-
-    public void markPostAsRead(int postId, Timestamp dateRead) {
-        var sql = "UPDATE posts SET is_read = TRUE, date_read = ? WHERE id = ?";
-        jdbcClient
-                .sql(sql)
-                .params(dateRead, postId)
-                .update();
     }
 
     public void markPostAsReadForUser(int postId, Timestamp dateRead, UUID userId) {
@@ -89,7 +75,7 @@ public class PostDao {
                 FROM blogs b
                 WHERE p.blog_id = b.id
                   AND p.id = :postId
-                  AND (b.user_id = :userId OR b.user_id IS NULL)
+                  AND b.user_id = :userId
                 """;
         jdbcClient
                 .sql(sql)
@@ -100,11 +86,19 @@ public class PostDao {
                 .update();
     }
 
-    public void deleteReadPostsOlderThanDays(int days) {
-        var query = "DELETE from posts WHERE is_read IS TRUE AND date_read < NOW() - make_interval(days => ?)";
+    public void deleteReadPostsOlderThanDaysForUser(int days, UUID userId) {
+        var query = """
+                DELETE FROM posts p
+                USING blogs b
+                WHERE p.blog_id = b.id
+                  AND b.user_id = :userId
+                  AND p.is_read IS TRUE
+                  AND p.date_read < NOW() - make_interval(days => :days)
+                """;
         jdbcClient
                 .sql(query)
-                .param(days)
+                .param("userId", userId)
+                .param("days", days)
                 .update();
     }
 }

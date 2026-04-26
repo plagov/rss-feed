@@ -36,16 +36,9 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
-    public boolean isRegistrationOpen() {
-        return !userDao.existsAny();
-    }
-
     public UserResponse registerUser(RegisterRequest request) {
-        if (!isRegistrationOpen()) {
-            throw new IllegalStateException("Registration is closed");
-        }
         if (userDao.existsByUsername(request.username())) {
-            throw new IllegalArgumentException("Username already exists");
+            throw new IllegalStateException("Username already exists");
         }
 
         var user = new UserAccount(
