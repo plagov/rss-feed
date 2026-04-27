@@ -55,4 +55,21 @@ public class UserDao {
                 ))
                 .optional();
     }
+
+    public Optional<UserAccount> findById(UUID id) {
+        return jdbcClient.sql("""
+                SELECT id, username, password_hash, email, created_at
+                FROM users
+                WHERE id = :id
+                """)
+                .param("id", id)
+                .query((rs, rowNum) -> new UserAccount(
+                        rs.getObject("id", UUID.class),
+                        rs.getString("username"),
+                        rs.getString("password_hash"),
+                        rs.getString("email"),
+                        rs.getObject("created_at", LocalDateTime.class)
+                ))
+                .optional();
+    }
 }

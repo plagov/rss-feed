@@ -5,6 +5,7 @@ import io.plagov.rssfeed.domain.UserAccount;
 import io.plagov.rssfeed.domain.request.LoginRequest;
 import io.plagov.rssfeed.domain.request.RegisterRequest;
 import io.plagov.rssfeed.domain.response.LoginResponse;
+import io.plagov.rssfeed.domain.response.MeResponse;
 import io.plagov.rssfeed.domain.response.UserResponse;
 import io.plagov.rssfeed.security.AuthenticatedUser;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,15 +26,18 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserContextService userContextService;
 
     public AuthService(UserDao userDao,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager,
-                       JwtService jwtService) {
+                       JwtService jwtService,
+                       UserContextService userContextService) {
         this.userDao = userDao;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.userContextService = userContextService;
     }
 
     public UserResponse registerUser(RegisterRequest request) {
@@ -63,5 +67,12 @@ public class AuthService {
         } catch (BadCredentialsException exception) {
             throw new IllegalArgumentException("Invalid username or password");
         }
+    }
+
+    public MeResponse getCurrentUser() {
+        var userId = userContextService.getCurrentUserId();
+        return userDao.findById(userId)
+                .map(user -> new MeResponse(user.id(), user.username()))
+                .orElseThrow(() -> new IllegalStateException("User not found: " + userId));
     }
 }
