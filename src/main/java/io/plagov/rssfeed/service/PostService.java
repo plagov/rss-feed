@@ -21,7 +21,9 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
 @Component
@@ -53,45 +55,53 @@ public class PostService {
 
     private void recordLatestForBlog(Blog blog) {
         logger.info("Evaluate blog {}", blog.name());
+
+        if (postDao.countUnreadPostsForBlog(blog.id()) > 0) {
+            logger.info("Skip fetching for blog {} - unread posts already exist", blog.name());
+            return;
+        }
+
         var latestSavedPost = postDao.getLatestPostForBlog(blog.id());
         var allEntries = getEntriesFromFeed(blog);
 
         if (latestSavedPost.isEmpty()) {
-            recordFirstEntryForBlog(blog, allEntries);
-        } else if (!latestSavedPostIsLatestInFeed(latestSavedPost.get(), allEntries)) {
-            saveNewPostsFromFeed(blog, latestSavedPost.get(), allEntries);
+            recordOldestEntryForBlog(blog, allEntries);
+        } else {
+            recordNextEntryForBlog(blog, latestSavedPost.get(), allEntries);
         }
     }
 
-    private void saveNewPostsFromFeed(Blog blog, PostResponse latestSavedPost, List<SyndEntry> allEntries) {
-        var postIndex = getIndexOfLatestSavedPostInFeed(latestSavedPost, allEntries);
-        logger.info("Save latest post for blog {}", blog.name());
-        for (var i = postIndex - 1; i >= 0; i--) {
-            var entry = allEntries.get(i);
-            var post = new PostRequest(blog.id(), entry.getTitle(), entry.getLink(), LocalDateTime.now(clock));
-            saveNewPost(post);
+    private void recordNextEntryForBlog(Blog blog, PostResponse latestSavedPost, List<SyndEntry> allEntries) {
+        var latestSavedPostIndex = getIndexOfLatestSavedPostInFeed(latestSavedPost, allEntries);
+
+        if (latestSavedPostIndex.isPresent()) {
+            var index = latestSavedPostIndex.get();
+            if (index > 0) {
+                var nextEntry = allEntries.get(index - 1);
+                saveNewPost(blog, nextEntry);
+            } else {
+                logger.info("No new posts for blog {}", blog.name());
+            }
+        } else {
+            logger.info("Latest saved post for blog {} is not in the feed. Fallback to oldest.", blog.name());
+            recordOldestEntryForBlog(blog, allEntries);
         }
     }
 
-    private boolean latestSavedPostIsLatestInFeed(PostResponse latestSavedPost, List<SyndEntry> allEntries) {
-        var index = getIndexOfLatestSavedPostInFeed(latestSavedPost, allEntries);
-        return index == 0;
-    }
-
-    private int getIndexOfLatestSavedPostInFeed(PostResponse latestSavedPost, List<SyndEntry> entriesFromFeed) {
+    private Optional<Integer> getIndexOfLatestSavedPostInFeed(PostResponse latestSavedPost, List<SyndEntry> entriesFromFeed) {
         return IntStream.range(0, entriesFromFeed.size())
                 .filter(i -> entriesFromFeed.get(i).getLink().equals(latestSavedPost.url()))
-                .findFirst()
-                .orElseThrow();
+                .boxed()
+                .findFirst();
     }
 
-    private void recordFirstEntryForBlog(Blog blog, List<SyndEntry> allEntries) {
-        var latestEntryFromFeed = allEntries.getFirst();
-        logger.info("No saved posts in database for blog {}", blog.name());
-        var post = new PostRequest(blog.id(),
-                latestEntryFromFeed.getTitle(),
-                latestEntryFromFeed.getLink(),
-                LocalDateTime.now(clock));
+    private void recordOldestEntryForBlog(Blog blog, List<SyndEntry> allEntries) {
+        var oldestEntryFromFeed = allEntries.getLast();
+        saveNewPost(blog, oldestEntryFromFeed);
+    }
+
+    private void saveNewPost(Blog blog, SyndEntry entry) {
+        var post = new PostRequest(blog.id(), entry.getTitle(), entry.getLink(), LocalDateTime.now(clock));
         saveNewPost(post);
     }
 
@@ -100,7 +110,7 @@ public class PostService {
         postDao.savePost(post);
     }
 
-    private List<SyndEntry> getEntriesFromFeed(Blog blog) {
+    List<SyndEntry> getEntriesFromFeed(Blog blog) {
         try {
             var uri = new URI(blog.feedUrl());
             return new SyndFeedInput().build(new InputSource(uri.toURL().openStream()))
@@ -115,6 +125,7 @@ public class PostService {
     public void markPostAsRead(int postId, UUID userId) {
         var now = Timestamp.from(Instant.now(clock));
         postDao.markPostAsReadForUser(postId, now, userId);
+        CompletableFuture.runAsync(() -> recordLatestBlogPosts(userId));
     }
 
     public void deleteReadPostsOlderThan30Days(UUID userId) {
