@@ -43,6 +43,11 @@ public class PostDao {
                 );
     }
 
+    public int countUnreadPostsForBlog(int blogId) {
+        var sql = "SELECT count(*) FROM posts WHERE blog_id = :blogId AND is_read = FALSE";
+        return jdbcClient.sql(sql).param("blogId", blogId).query(Integer.class).single();
+    }
+
     public void savePost(PostRequest post) {
         String sql = "INSERT INTO posts (blog_id, post_name, post_url, date_added) VALUES (?, ?, ?, ?)";
         jdbcClient
