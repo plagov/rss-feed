@@ -77,7 +77,7 @@ class PostServiceTest {
     }
 
     @Test
-    void shouldFetchOldestPostForNewBlog() {
+    void shouldFetchNewestPostForNewBlog() {
         var blog = blogDao.getBlogForUser(blogId, userId);
         List<SyndEntry> entries = createEntries("Post 3", "Post 2", "Post 1");
         doReturn(entries).when(postService).getEntriesFromFeed(blog);
@@ -85,7 +85,18 @@ class PostServiceTest {
         postService.recordLatestBlogPosts(userId);
 
         var posts = jdbcTemplate.queryForList("SELECT post_name FROM posts", String.class);
-        assertThat(posts).containsExactly("Post 1"); // Oldest
+        assertThat(posts).containsExactly("Post 3");
+    }
+
+    @Test
+    void shouldDoNothingForNewBlogWhenFeedIsEmpty() {
+        var blog = blogDao.getBlogForUser(blogId, userId);
+        doReturn(List.of()).when(postService).getEntriesFromFeed(blog);
+
+        postService.recordLatestBlogPosts(userId);
+
+        var postsCount = jdbcTemplate.queryForObject("SELECT count(*) FROM posts", Integer.class);
+        assertThat(postsCount).isZero();
     }
 
     @Test

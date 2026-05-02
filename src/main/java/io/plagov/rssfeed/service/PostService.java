@@ -65,7 +65,7 @@ public class PostService {
         var allEntries = getEntriesFromFeed(blog);
 
         if (latestSavedPost.isEmpty()) {
-            recordOldestEntryForBlog(blog, allEntries);
+            recordNewestEntryForBlog(blog, allEntries);
         } else {
             recordNextEntryForBlog(blog, latestSavedPost.get(), allEntries);
         }
@@ -95,7 +95,22 @@ public class PostService {
                 .findFirst();
     }
 
+    private void recordNewestEntryForBlog(Blog blog, List<SyndEntry> allEntries) {
+        if (allEntries.isEmpty()) {
+            logger.info("No posts available for blog {} yet", blog.name());
+            return;
+        }
+
+        var newestEntryFromFeed = allEntries.getFirst();
+        saveNewPost(blog, newestEntryFromFeed);
+    }
+
     private void recordOldestEntryForBlog(Blog blog, List<SyndEntry> allEntries) {
+        if (allEntries.isEmpty()) {
+            logger.info("No posts available for blog {} yet", blog.name());
+            return;
+        }
+
         var oldestEntryFromFeed = allEntries.getLast();
         saveNewPost(blog, oldestEntryFromFeed);
     }
