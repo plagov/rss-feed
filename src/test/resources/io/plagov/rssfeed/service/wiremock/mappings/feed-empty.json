@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/feed-empty"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/rss+xml; charset=UTF-8"
+    },
+    "bodyFileName": "feed-empty.xml"
+  }
+}

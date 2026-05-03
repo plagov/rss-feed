@@ -37,6 +37,7 @@ dependencies {
     implementation("org.testcontainers:postgresql:$testContainersVersion")
     implementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     implementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-15")
 }
 
 tasks.withType<Test> {

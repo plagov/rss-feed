@@ -1,12 +1,8 @@
 package io.plagov.rssfeed.service;
 
-import com.rometools.rome.feed.synd.SyndEntry;
-import com.rometools.rome.feed.synd.SyndEntryImpl;
 import io.plagov.rssfeed.configuration.ContainersConfig;
 import io.plagov.rssfeed.configuration.FakeClockConfiguration;
-import io.plagov.rssfeed.dao.BlogDao;
-import io.plagov.rssfeed.dao.PostDao;
-import io.plagov.rssfeed.domain.Blog;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,17 +10,21 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.mockito.internal.verification.VerificationModeFactory.atLeastOnce;
 
 @Testcontainers
 @SpringBootTest
@@ -37,16 +37,17 @@ import static org.mockito.internal.verification.VerificationModeFactory.atLeastO
 })
 class PostServiceTest {
 
-    @Autowired
-    private BlogDao blogDao;
-
-    @Autowired
-    private PostDao postDao;
+    @Container
+    WireMockContainer wiremockServer = new WireMockContainer("wiremock/wiremock:3.13.2")
+            .withMappingFromResource("feed-three-posts", PostServiceTest.class, "wiremock/mappings/feed-three-posts.json")
+            .withMappingFromResource("feed-empty", PostServiceTest.class, "wiremock/mappings/feed-empty.json")
+            .withFileFromResource("feed-three-posts.xml", "io/plagov/rssfeed/service/wiremock/__files/feed-three-posts.xml")
+            .withFileFromResource("feed-empty.xml", "io/plagov/rssfeed/service/wiremock/__files/feed-empty.xml");
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @MockitoSpyBean
+    @Autowired
     private PostService postService;
 
     private final UUID userId = UUID.randomUUID();
@@ -58,17 +59,28 @@ class PostServiceTest {
         jdbcTemplate.update("DELETE FROM blogs");
         jdbcTemplate.update("DELETE FROM users");
 
-        jdbcTemplate.update("INSERT INTO users (id, username, password_hash, created_at) VALUES (?, ?, ?, NOW())",
-                userId, "testuser", "hash");
-        jdbcTemplate.update("INSERT INTO blogs (name, feed_url, is_subscribed, user_id) VALUES (?, ?, ?, ?)",
-                "Test Blog", "http://test.com/feed", true, userId);
-        blogId = jdbcTemplate.queryForObject("SELECT id FROM blogs WHERE name = 'Test Blog'", Integer.class);
+        jdbcTemplate.update("""
+                        INSERT INTO users (id, username, password_hash, email, created_at)
+                        VALUES (?, ?, ?, ?, NOW())
+                        """,
+                userId, "testuser", "hash", "test@example.com");
+    }
+
+    @AfterEach
+    void tearDown() {
+        jdbcTemplate.update("DELETE FROM posts");
+        jdbcTemplate.update("DELETE FROM blogs");
+        jdbcTemplate.update("DELETE FROM users");
     }
 
     @Test
     void shouldNotFetchIfUnreadPostsExist() {
-        jdbcTemplate.update("INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added) VALUES (?, ?, ?, ?, NOW())",
-                blogId, "Unread Post", "http://unread.com", false);
+        insertBlog("/feed-three-posts");
+        jdbcTemplate.update("""
+                        INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added)
+                        VALUES (?, ?, ?, ?, NOW())
+                        """,
+                blogId, "Unread Post", "https://example.com/unread-post", false);
 
         postService.recordLatestBlogPosts(userId);
 
@@ -78,95 +90,122 @@ class PostServiceTest {
 
     @Test
     void shouldFetchNewestPostForNewBlog() {
-        var blog = blogDao.getBlogForUser(blogId, userId);
-        List<SyndEntry> entries = createEntries("Post 3", "Post 2", "Post 1");
-        doReturn(entries).when(postService).getEntriesFromFeed(blog);
+        insertBlog("/feed-three-posts");
 
         postService.recordLatestBlogPosts(userId);
 
-        var posts = jdbcTemplate.queryForList("SELECT post_name FROM posts", String.class);
-        assertThat(posts).containsExactly("Post 3");
+        assertThat(postNames()).containsExactly("Post 3");
+        assertRssServed("/feed-three-posts");
     }
 
     @Test
     void shouldDoNothingForNewBlogWhenFeedIsEmpty() {
-        var blog = blogDao.getBlogForUser(blogId, userId);
-        doReturn(List.of()).when(postService).getEntriesFromFeed(blog);
+        insertBlog("/feed-empty");
 
         postService.recordLatestBlogPosts(userId);
 
         var postsCount = jdbcTemplate.queryForObject("SELECT count(*) FROM posts", Integer.class);
         assertThat(postsCount).isZero();
+        assertRssServed("/feed-empty");
     }
 
     @Test
     void shouldFetchNextPostIfLatestSavedFoundInFeed() {
-        jdbcTemplate.update("INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added) VALUES (?, ?, ?, ?, NOW())",
-                blogId, "Post 1", "url1", true);
-
-        var blog = blogDao.getBlogForUser(blogId, userId);
-        List<SyndEntry> entries = createEntries("Post 3", "Post 2", "Post 1");
-        doReturn(entries).when(postService).getEntriesFromFeed(blog);
+        insertBlog("/feed-three-posts");
+        jdbcTemplate.update("""
+                        INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added)
+                        VALUES (?, ?, ?, ?, NOW())
+                        """,
+                blogId, "Post 1", "https://example.com/post-1", true);
 
         postService.recordLatestBlogPosts(userId);
 
-        var posts = jdbcTemplate.queryForList("SELECT post_name FROM posts ORDER BY id", String.class);
-        assertThat(posts).containsExactly("Post 1", "Post 2");
+        assertThat(postNames()).containsExactly("Post 1", "Post 2");
+        assertRssServed("/feed-three-posts");
     }
 
     @Test
     void shouldFallbackToOldestIfLatestSavedNotFoundInFeed() {
-        jdbcTemplate.update("INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added) VALUES (?, ?, ?, ?, NOW())",
-                blogId, "Old Post", "old-url", true);
-
-        var blog = blogDao.getBlogForUser(blogId, userId);
-        List<SyndEntry> entries = createEntries("Post 3", "Post 2", "Post 1");
-        doReturn(entries).when(postService).getEntriesFromFeed(blog);
-
-        postService.recordLatestBlogPosts(userId);
-
-        var posts = jdbcTemplate.queryForList("SELECT post_name FROM posts ORDER BY id", String.class);
-        assertThat(posts).containsExactly("Old Post", "Post 1");
-    }
-
-    @Test
-    void shouldDoNothingIfLatestSavedIsAlreadyLatestInFeed() {
-        jdbcTemplate.update("INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added) VALUES (?, ?, ?, ?, NOW())",
-                blogId, "Post 3", "url3", true);
-
-        var blog = blogDao.getBlogForUser(blogId, userId);
-        List<SyndEntry> entries = createEntries("Post 3", "Post 2", "Post 1");
-        doReturn(entries).when(postService).getEntriesFromFeed(blog);
+        insertBlog("/feed-three-posts");
+        jdbcTemplate.update("""
+                        INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added)
+                        VALUES (?, ?, ?, ?, NOW())
+                        """,
+                blogId, "Old Post", "https://example.com/old-post", true);
 
         postService.recordLatestBlogPosts(userId);
 
-        var posts = jdbcTemplate.queryForList("SELECT post_name FROM posts", String.class);
-        assertThat(posts).containsExactly("Post 3");
+        assertThat(postNames()).containsExactly("Old Post", "Post 1");
+        assertRssServed("/feed-three-posts");
     }
 
     @Test
-    void shouldTriggerGlobalFetchWhenPostIsMarkedAsRead() throws InterruptedException {
-        jdbcTemplate.update("INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added) VALUES (?, ?, ?, ?, NOW())",
-                blogId, "Post to read", "url-to-read", false);
-        var postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE post_name = 'Post to read'", Integer.class);
+    void shouldTriggerGlobalFetchWhenPostIsMarkedAsRead() throws Exception {
+        insertBlog("/feed-three-posts");
+        jdbcTemplate.update("""
+                        INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added)
+                        VALUES (?, ?, ?, ?, NOW())
+                        """,
+                blogId, "Post 1", "https://example.com/post-1", false);
+        var postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE post_name = 'Post 1'", Integer.class);
 
         postService.markPostAsRead(postId, userId);
 
-        // Wait a bit for the async call
-        Thread.sleep(1000);
-
-        verify(postService, atLeastOnce()).recordLatestBlogPosts(userId);
+        awaitPostNames("Post 1", "Post 2");
+        var isRead = jdbcTemplate.queryForObject("SELECT is_read FROM posts WHERE id = ?", Boolean.class, postId);
+        assertThat(isRead).isTrue();
+        assertRssServed("/feed-three-posts");
     }
 
-    private List<SyndEntry> createEntries(String... titles) {
-        List<SyndEntry> entries = new ArrayList<>();
-        int i = titles.length;
-        for (String title : titles) {
-            SyndEntry entry = new SyndEntryImpl();
-            entry.setTitle(title);
-            entry.setLink("url" + i--);
-            entries.add(entry);
+    private void insertBlog(String feedPath) {
+        jdbcTemplate.update("""
+                        INSERT INTO blogs (name, feed_url, is_subscribed, user_id)
+                        VALUES (?, ?, ?, ?)
+                        """,
+                "Test Blog", wiremockServer.getUrl(feedPath), true, userId);
+        blogId = jdbcTemplate.queryForObject("SELECT id FROM blogs WHERE name = 'Test Blog'", Integer.class);
+    }
+
+    private void assertRssServed(String feedPath) {
+        try {
+            HttpResponse<String> response = HttpClient.newHttpClient().send(
+                    HttpRequest.newBuilder(URI.create(wiremockServer.getUrl(feedPath)))
+                            .GET()
+                            .build(),
+                    HttpResponse.BodyHandlers.ofString());
+
+            assertThat(response.statusCode()).isEqualTo(200);
+            assertThat(response.body()).contains("<rss version=\"2.0\">");
+        } catch (IOException exception) {
+            throw new IllegalStateException("Failed to call WireMock feed endpoint", exception);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while calling WireMock feed endpoint", exception);
         }
-        return entries;
+    }
+
+    private List<String> postNames() {
+        return jdbcTemplate.queryForList("SELECT post_name FROM posts ORDER BY id", String.class);
+    }
+
+    private void awaitPostNames(String... expectedNames) throws InterruptedException {
+        AssertionError lastError = null;
+        var deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+
+        while (System.nanoTime() < deadline) {
+            try {
+                assertThat(postNames()).containsExactly(expectedNames);
+                return;
+            } catch (AssertionError error) {
+                lastError = error;
+                Thread.sleep(100);
+            }
+        }
+
+        if (lastError != null) {
+            throw lastError;
+        }
+
+        throw new AssertionError("Timed out waiting for posts " + Arrays.toString(expectedNames));
     }
 }
