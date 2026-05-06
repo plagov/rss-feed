@@ -60,6 +60,7 @@ class PostControllerTest {
                         .header("Authorization", bearer(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].blogName").value("Of Dollars And Data"))
                 .andExpect(jsonPath("$[0].name").value("Post 1"))
                 .andExpect(jsonPath("$[1].name").value("Post 2"));
     }
