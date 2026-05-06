@@ -23,8 +23,10 @@ public class PostDao {
 
     public Optional<PostResponse> getLatestPostForBlog(int blogId) {
         var sql = """
-                SELECT p.*
+                SELECT p.*,
+                       b.name AS blog_name
                 FROM posts p
+                JOIN blogs b ON p.blog_id = b.id
                 WHERE p.blog_id = :blogId
                 ORDER BY p.id DESC
                 LIMIT 1;""";
@@ -36,6 +38,7 @@ public class PostDao {
         return (rs, rowNum) ->
                 new PostResponse(rs.getInt("id"),
                         rs.getInt("blog_id"),
+                        rs.getString("blog_name"),
                         rs.getString("post_name"),
                         rs.getString("post_url"),
                         rs.getBoolean("is_read"),
@@ -58,7 +61,8 @@ public class PostDao {
 
     public List<PostResponse> getUnreadPostsForUser(UUID userId) {
         var sql = """
-                SELECT p.*
+                SELECT p.*,
+                       b.name AS blog_name
                 FROM posts p
                 JOIN blogs b ON p.blog_id = b.id
                 WHERE p.is_read = FALSE

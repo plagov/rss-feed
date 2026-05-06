@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public record PostResponse(
         int id,
         int blogId,
+        String blogName,
         String name,
         String url,
         boolean isRead,
