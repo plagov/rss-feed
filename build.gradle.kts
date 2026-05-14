@@ -6,6 +6,12 @@ plugins {
     id("org.graalvm.buildtools.native") version "0.10.5"
 }
 
+graalvmNative {
+    metadataRepository {
+        enabled.set(true)
+    }
+}
+
 val testContainersVersion = "1.21.4"
 
 group = "io.plagov"
