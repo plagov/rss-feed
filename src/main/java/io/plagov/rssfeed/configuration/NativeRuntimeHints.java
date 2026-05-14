@@ -18,6 +18,14 @@ public class NativeRuntimeHints {
                 TypeReference.of("org.flywaydb.core.internal.configuration.extensions.PrepareScriptFilenameConfigurationExtension"),
                 MemberCategory.INVOKE_PUBLIC_METHODS
             );
+            hints.reflection().registerType(
+                TypeReference.of("org.flywaydb.database.postgresql.PostgreSQLConfigurationExtension"),
+                MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS
+            );
+            hints.reflection().registerType(
+                TypeReference.of("org.flywaydb.database.postgresql.TransactionalModel"),
+                MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS
+            );
         }
     }
 }
