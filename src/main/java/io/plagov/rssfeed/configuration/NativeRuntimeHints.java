@@ -30,6 +30,20 @@ public class NativeRuntimeHints {
                 CorsProperties.class,
                 MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS
             );
+
+            // Reflection hints for Hibernate Validator loggers (required for AOT validation)
+            hints.reflection().registerType(
+                TypeReference.of("org.hibernate.validator.internal.util.logging.Log_$logger"),
+                MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS
+            );
+            hints.reflection().registerType(
+                TypeReference.of("org.hibernate.validator.internal.util.logging.Messages_$bundle"),
+                MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS
+            );
+            hints.reflection().registerType(
+                org.hibernate.validator.HibernateValidator.class,
+                MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS
+            );
         }
     }
 
