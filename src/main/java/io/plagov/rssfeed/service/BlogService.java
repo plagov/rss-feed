@@ -23,7 +23,7 @@ public class BlogService {
 
     public void unsubscribeFromBlog(int blogId, UUID userId) {
         var blogEntity = blogDao.getBlogForUser(blogId, userId);
-        blogDao.updateBlogForUser(blogId, blogEntity.name(), blogEntity.feedUrl(), false, userId);
+        blogDao.updateBlogForUser(blogId, blogEntity.name(), blogEntity.feedUrl(), false, blogEntity.useAiFiltering(), userId);
     }
 
     public void subscribeToNewBlog(NewBlog newBlog, UUID userId) {

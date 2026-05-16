@@ -32,12 +32,16 @@ public class PostService {
     private final BlogDao blogDao;
     private final PostDao postDao;
     private final Clock clock;
+    private final AiService aiService;
+    private final ScrapperService scrapperService;
     private final Logger logger = LoggerFactory.getLogger(PostService.class);
 
-    public PostService(BlogDao blogDao, PostDao postDao, Clock clock) {
+    public PostService(BlogDao blogDao, PostDao postDao, Clock clock, AiService aiService, ScrapperService scrapperService) {
         this.blogDao = blogDao;
         this.postDao = postDao;
         this.clock = clock;
+        this.aiService = aiService;
+        this.scrapperService = scrapperService;
     }
 
     public void recordLatestBlogPosts(UUID userId) {
@@ -75,17 +79,42 @@ public class PostService {
         var latestSavedPostIndex = getIndexOfLatestSavedPostInFeed(latestSavedPost, allEntries);
 
         if (latestSavedPostIndex.isPresent()) {
-            var index = latestSavedPostIndex.get();
-            if (index > 0) {
-                var nextEntry = allEntries.get(index - 1);
-                saveNewPost(blog, nextEntry);
-            } else {
-                logger.info("No new posts for blog {}", blog.name());
+            int index = latestSavedPostIndex.get();
+            int maxAttempts = 5;
+            int attempts = 0;
+
+            for (int i = index - 1; i >= 0 && attempts < maxAttempts; i--) {
+                var nextEntry = allEntries.get(i);
+                if (processEntry(blog, nextEntry)) {
+                    return;
+                }
+                attempts++;
             }
         } else {
             logger.info("Latest saved post for blog {} is not in the feed. Fallback to oldest.", blog.name());
             recordOldestEntryForBlog(blog, allEntries);
         }
+    }
+
+    private boolean processEntry(Blog blog, SyndEntry entry) {
+        boolean isIgnored = false;
+        String reasoning = null;
+
+        if (blog.useAiFiltering()) {
+            try {
+                logger.info("Scraping and evaluating entry {} for blog {}", entry.getTitle(), blog.name());
+                String content = scrapperService.scrape(entry.getLink());
+                var evaluation = aiService.evaluatePost(content);
+                isIgnored = !evaluation.worthReading();
+                reasoning = evaluation.reasoning();
+            } catch (Exception e) {
+                logger.error("Error during AI evaluation for blog {}. Defaulting to NOT ignored.", blog.name(), e);
+            }
+        }
+
+        var post = new PostRequest(blog.id(), entry.getTitle(), entry.getLink(), LocalDateTime.now(clock), isIgnored, reasoning);
+        saveNewPost(post);
+        return !isIgnored;
     }
 
     private Optional<Integer> getIndexOfLatestSavedPostInFeed(PostResponse latestSavedPost, List<SyndEntry> entriesFromFeed) {
@@ -101,8 +130,12 @@ public class PostService {
             return;
         }
 
-        var newestEntryFromFeed = allEntries.getFirst();
-        saveNewPost(blog, newestEntryFromFeed);
+        int maxAttempts = 5;
+        for (int i = 0; i < Math.min(allEntries.size(), maxAttempts); i++) {
+            if (processEntry(blog, allEntries.get(i))) {
+                return;
+            }
+        }
     }
 
     private void recordOldestEntryForBlog(Blog blog, List<SyndEntry> allEntries) {
@@ -111,13 +144,14 @@ public class PostService {
             return;
         }
 
-        var oldestEntryFromFeed = allEntries.getLast();
-        saveNewPost(blog, oldestEntryFromFeed);
-    }
-
-    private void saveNewPost(Blog blog, SyndEntry entry) {
-        var post = new PostRequest(blog.id(), entry.getTitle(), entry.getLink(), LocalDateTime.now(clock));
-        saveNewPost(post);
+        int maxAttempts = 5;
+        int size = allEntries.size();
+        for (int i = 0; i < maxAttempts && i < size; i++) {
+            var entry = allEntries.get(size - 1 - i);
+            if (processEntry(blog, entry)) {
+                return;
+            }
+        }
     }
 
     public void saveNewPost(PostRequest post) {

@@ -4,6 +4,7 @@ public record Blog(
     int id,
     String name,
     String feedUrl,
-    boolean isSubscribed
+    boolean isSubscribed,
+    boolean useAiFiltering
 ) {
 }

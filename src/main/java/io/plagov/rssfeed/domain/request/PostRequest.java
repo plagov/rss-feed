@@ -6,6 +6,8 @@ public record PostRequest(
         int blogId,
         String name,
         String url,
-        LocalDateTime dateAdded
+        LocalDateTime dateAdded,
+        boolean isIgnored,
+        String aiReason
 ) {
 }

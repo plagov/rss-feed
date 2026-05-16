@@ -9,6 +9,8 @@ public record PostResponse(
         String name,
         String url,
         boolean isRead,
+        boolean isIgnored,
+        String aiReason,
         LocalDateTime dateAdded
 ) {
 }

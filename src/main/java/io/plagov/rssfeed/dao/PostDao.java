@@ -42,6 +42,8 @@ public class PostDao {
                         rs.getString("post_name"),
                         rs.getString("post_url"),
                         rs.getBoolean("is_read"),
+                        rs.getBoolean("is_ignored"),
+                        rs.getString("ai_reason"),
                         rs.getObject("date_added", LocalDateTime.class)
                 );
     }
@@ -52,10 +54,10 @@ public class PostDao {
     }
 
     public void savePost(PostRequest post) {
-        String sql = "INSERT INTO posts (blog_id, post_name, post_url, date_added) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO posts (blog_id, post_name, post_url, date_added, is_ignored, ai_reason) VALUES (?, ?, ?, ?, ?, ?)";
         jdbcClient
                 .sql(sql)
-                .params(post.blogId(), post.name(), post.url(), post.dateAdded())
+                .params(post.blogId(), post.name(), post.url(), post.dateAdded(), post.isIgnored(), post.aiReason())
                 .update();
     }
 

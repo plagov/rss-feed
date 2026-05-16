@@ -55,12 +55,13 @@ public class BlogDao {
                 .single();
     }
 
-    public void updateBlogForUser(int blogId, String blogName, String feedUrl, boolean isSubscribed, UUID userId) {
+    public void updateBlogForUser(int blogId, String blogName, String feedUrl, boolean isSubscribed, boolean useAiFiltering, UUID userId) {
         var sql = """
                 UPDATE blogs
                 SET name = :blogName,
                     feed_url = :feedUrl,
-                    is_subscribed = :isSubscribed
+                    is_subscribed = :isSubscribed,
+                    use_ai_filtering = :useAiFiltering
                 WHERE id = :blogId
                   AND user_id = :userId
                 """;
@@ -69,6 +70,7 @@ public class BlogDao {
                 .param("blogName", blogName)
                 .param("feedUrl", feedUrl)
                 .param("isSubscribed", isSubscribed)
+                .param("useAiFiltering", useAiFiltering)
                 .param("userId", userId)
                 .param("blogId", blogId)
                 .update();
