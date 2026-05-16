@@ -2,6 +2,7 @@ package io.plagov.rssfeed.controller;
 
 import io.plagov.rssfeed.domain.Blog;
 import io.plagov.rssfeed.domain.request.NewBlog;
+import io.plagov.rssfeed.domain.request.UpdateBlogRequest;
 import io.plagov.rssfeed.service.BlogService;
 import io.plagov.rssfeed.service.PostService;
 import io.plagov.rssfeed.service.UserContextService;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +49,13 @@ public class BlogController {
     public ResponseEntity<Void> unsubscribeFromBlog(@PathVariable int id) {
         var userId = userContextService.getCurrentUserId();
         blogService.unsubscribeFromBlog(id, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateBlog(@PathVariable int id, @RequestBody UpdateBlogRequest updateBlogRequest) {
+        var userId = userContextService.getCurrentUserId();
+        blogService.updateBlog(id, updateBlogRequest, userId);
         return ResponseEntity.ok().build();
     }
 

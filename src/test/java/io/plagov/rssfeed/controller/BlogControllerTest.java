@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,7 +46,17 @@ class BlogControllerTest {
 
     @AfterEach
     void tearDown() {
+        jdbcTemplate.update("""
+                UPDATE blogs
+                SET name = 'Of Dollars And Data',
+                    feed_url = 'https://ofdollarsanddata.com/feed/',
+                    is_subscribed = true,
+                    use_ai_filtering = false,
+                    user_id = NULL
+                WHERE id = 1
+                """);
         jdbcTemplate.update("UPDATE blogs SET user_id = NULL");
+        jdbcTemplate.update("DELETE FROM blogs WHERE name = 'Test Blog'");
         jdbcTemplate.update("DELETE FROM users");
     }
 
@@ -92,7 +103,71 @@ class BlogControllerTest {
         assertThat(isSubscribed).isFalse();
     }
 
+    @Test
+    void shouldUpdateBlogForAuthenticatedUser() throws Exception {
+        var token = registerLoginAndAssignSeedBlog("blogger");
+
+        mockMvc.perform(put("/api/blogs/1")
+                        .header("Authorization", bearer(token))
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "Updated Blog",
+                                  "feedUrl": "https://example.com/updated-feed.xml",
+                                  "isSubscribed": false,
+                                  "useAiFiltering": true
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        var updatedBlog = jdbcTemplate.queryForMap(
+                "SELECT name, feed_url, is_subscribed, use_ai_filtering FROM blogs WHERE id = 1"
+        );
+        assertThat(updatedBlog.get("name")).isEqualTo("Updated Blog");
+        assertThat(updatedBlog.get("feed_url")).isEqualTo("https://example.com/updated-feed.xml");
+        assertThat(updatedBlog.get("is_subscribed")).isEqualTo(false);
+        assertThat(updatedBlog.get("use_ai_filtering")).isEqualTo(true);
+    }
+
+    @Test
+    void shouldNotUpdateBlogOwnedByAnotherUser() throws Exception {
+        registerLoginAndAssignSeedBlog("owner");
+        var beforeUpdate = jdbcTemplate.queryForMap(
+                "SELECT name, feed_url, is_subscribed, use_ai_filtering FROM blogs WHERE id = 1"
+        );
+
+        var attackerToken = registerLogin("attacker");
+        mockMvc.perform(put("/api/blogs/1")
+                        .header("Authorization", bearer(attackerToken))
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "Malicious Update",
+                                  "feedUrl": "https://example.com/malicious.xml",
+                                  "isSubscribed": false,
+                                  "useAiFiltering": true
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        var afterUpdate = jdbcTemplate.queryForMap(
+                "SELECT name, feed_url, is_subscribed, use_ai_filtering FROM blogs WHERE id = 1"
+        );
+        assertThat(afterUpdate).isEqualTo(beforeUpdate);
+    }
+
     private String registerLoginAndAssignSeedBlog(String username) throws Exception {
+        var token = registerLogin(username);
+        var userId = jdbcTemplate.queryForObject(
+                "SELECT id FROM users WHERE username = ?",
+                UUID.class,
+                username
+        );
+        jdbcTemplate.update("UPDATE blogs SET user_id = ? WHERE id = 1", userId);
+        return token;
+    }
+
+    private String registerLogin(String username) throws Exception {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(APPLICATION_JSON)
                         .content("""
@@ -103,13 +178,6 @@ class BlogControllerTest {
                                 }
                                 """.formatted(username, username)))
                 .andExpect(status().isCreated());
-
-        var userId = jdbcTemplate.queryForObject(
-                "SELECT id FROM users WHERE username = ?",
-                UUID.class,
-                username
-        );
-        jdbcTemplate.update("UPDATE blogs SET user_id = ? WHERE id = 1", userId);
 
         var loginResponse = mockMvc.perform(post("/api/auth/login")
                         .contentType(APPLICATION_JSON)

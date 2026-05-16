@@ -3,6 +3,7 @@ package io.plagov.rssfeed.service;
 import io.plagov.rssfeed.dao.BlogDao;
 import io.plagov.rssfeed.domain.Blog;
 import io.plagov.rssfeed.domain.request.NewBlog;
+import io.plagov.rssfeed.domain.request.UpdateBlogRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,5 +29,9 @@ public class BlogService {
 
     public void subscribeToNewBlog(NewBlog newBlog, UUID userId) {
         blogDao.addNewBlogForUser(newBlog.feedUrl(), newBlog.name(), userId);
+    }
+
+    public void updateBlog(int blogId, UpdateBlogRequest request, UUID userId) {
+        blogDao.updateBlogForUser(blogId, request.name(), request.feedUrl(), request.isSubscribed(), request.useAiFiltering(), userId);
     }
 }
