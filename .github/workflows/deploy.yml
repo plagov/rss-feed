@@ -32,15 +32,10 @@ jobs:
       - name: Setup flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
 
-      - name: Log in to Fly.io Docker Registry
-        run: flyctl auth docker
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - name: Build and Push Native Image
-        run: ./gradlew bootBuildImage --imageName=registry.fly.io/rss-feed:latest --publishImage
+      - name: Build JAR
+        run: ./gradlew bootJar
 
       - name: Deploy
-        run: flyctl deploy --image registry.fly.io/rss-feed:latest
+        run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
