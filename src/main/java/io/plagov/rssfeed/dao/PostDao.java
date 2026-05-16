@@ -53,11 +53,21 @@ public class PostDao {
         return jdbcClient.sql(sql).param("blogId", blogId).query(Integer.class).single();
     }
 
-    public void savePost(PostRequest post) {
-        String sql = "INSERT INTO posts (blog_id, post_name, post_url, date_added, is_ignored, ai_reason) VALUES (?, ?, ?, ?, ?, ?)";
+    public void savePost(PostRequest post, boolean isRead, Timestamp dateRead) {
+        String sql = """
+                INSERT INTO posts (blog_id, post_name, post_url, date_added, date_read, is_read, is_ignored, ai_reason)
+                VALUES (:blogId, :postName, :postUrl, :dateAdded, CASE WHEN :isRead THEN CAST(:dateRead AS timestamp) ELSE NULL::timestamp END, :isRead, :isIgnored, :aiReason)
+                """;
         jdbcClient
                 .sql(sql)
-                .params(post.blogId(), post.name(), post.url(), post.dateAdded(), post.isIgnored(), post.aiReason())
+                .param("blogId", post.blogId())
+                .param("postName", post.name())
+                .param("postUrl", post.url())
+                .param("dateAdded", post.dateAdded())
+                .param("dateRead", dateRead)
+                .param("isRead", isRead)
+                .param("isIgnored", post.isIgnored())
+                .param("aiReason", post.aiReason())
                 .update();
     }
 

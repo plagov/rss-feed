@@ -99,21 +99,23 @@ public class PostService {
     private boolean processEntry(Blog blog, SyndEntry entry) {
         boolean isIgnored = false;
         String reasoning = null;
+        var dateRead = Timestamp.from(Instant.now(clock));
 
         if (blog.useAiFiltering()) {
             try {
                 logger.info("Scraping and evaluating entry {} for blog {}", entry.getTitle(), blog.name());
                 String content = scrapperService.scrape(entry.getLink());
                 var evaluation = aiService.evaluatePost(content);
+                logger.info("AI evaluation result for blog {}: {}", blog.name(), evaluation);
                 isIgnored = !evaluation.worthReading();
-                reasoning = evaluation.reasoning();
+                reasoning = isIgnored ? evaluation.reasoning() : null;
             } catch (Exception e) {
                 logger.error("Error during AI evaluation for blog {}. Defaulting to NOT ignored.", blog.name(), e);
             }
         }
 
         var post = new PostRequest(blog.id(), entry.getTitle(), entry.getLink(), LocalDateTime.now(clock), isIgnored, reasoning);
-        saveNewPost(post);
+        postDao.savePost(post, isIgnored, dateRead);
         return !isIgnored;
     }
 
@@ -152,11 +154,6 @@ public class PostService {
                 return;
             }
         }
-    }
-
-    public void saveNewPost(PostRequest post) {
-        logger.info("Save new post {}", post.name());
-        postDao.savePost(post);
     }
 
     List<SyndEntry> getEntriesFromFeed(Blog blog) {

@@ -2,6 +2,7 @@ package io.plagov.rssfeed.service;
 
 import io.plagov.rssfeed.configuration.ContainersConfig;
 import io.plagov.rssfeed.configuration.FakeClockConfiguration;
+import io.plagov.rssfeed.domain.response.AiPostEvaluation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,12 +21,16 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 @Testcontainers
 @SpringBootTest
@@ -82,7 +87,7 @@ class PostServiceTest {
 
     @Test
     void shouldNotFetchIfUnreadPostsExist() {
-        insertBlog("/feed-three-posts");
+        insertBlog("/feed-three-posts", false);
         jdbcTemplate.update("""
                         INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added)
                         VALUES (?, ?, ?, ?, NOW())
@@ -97,7 +102,7 @@ class PostServiceTest {
 
     @Test
     void shouldFetchNewestPostForNewBlog() {
-        insertBlog("/feed-three-posts");
+        insertBlog("/feed-three-posts", false);
 
         postService.recordLatestBlogPosts(userId);
 
@@ -107,7 +112,7 @@ class PostServiceTest {
 
     @Test
     void shouldDoNothingForNewBlogWhenFeedIsEmpty() {
-        insertBlog("/feed-empty");
+        insertBlog("/feed-empty", false);
 
         postService.recordLatestBlogPosts(userId);
 
@@ -118,7 +123,7 @@ class PostServiceTest {
 
     @Test
     void shouldFetchNextPostIfLatestSavedFoundInFeed() {
-        insertBlog("/feed-three-posts");
+        insertBlog("/feed-three-posts", false);
         jdbcTemplate.update("""
                         INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added)
                         VALUES (?, ?, ?, ?, NOW())
@@ -133,7 +138,7 @@ class PostServiceTest {
 
     @Test
     void shouldFallbackToOldestIfLatestSavedNotFoundInFeed() {
-        insertBlog("/feed-three-posts");
+        insertBlog("/feed-three-posts", false);
         jdbcTemplate.update("""
                         INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added)
                         VALUES (?, ?, ?, ?, NOW())
@@ -148,7 +153,7 @@ class PostServiceTest {
 
     @Test
     void shouldTriggerGlobalFetchWhenPostIsMarkedAsRead() throws Exception {
-        insertBlog("/feed-three-posts");
+        insertBlog("/feed-three-posts", false);
         jdbcTemplate.update("""
                         INSERT INTO posts (blog_id, post_name, post_url, is_read, date_added)
                         VALUES (?, ?, ?, ?, NOW())
@@ -164,12 +169,48 @@ class PostServiceTest {
         assertRssServed("/feed-three-posts");
     }
 
-    private void insertBlog(String feedPath) {
+    @Test
+    void shouldStoreAiIgnoredPostAsRead() throws Exception {
+        insertBlog("/feed-three-posts", true);
+        doReturn("Post 3 content").when(scrapperService).scrape("https://example.com/post-3");
+        when(aiService.evaluatePost("Post 3 content"))
+                .thenReturn(new AiPostEvaluation(false, "ignored"));
+
+        postService.recordLatestBlogPosts(userId);
+
+        var postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE post_name = 'Post 3'", Integer.class);
+        var isRead = jdbcTemplate.queryForObject("SELECT is_read FROM posts WHERE id = ?", Boolean.class, postId);
+        var isIgnored = jdbcTemplate.queryForObject("SELECT is_ignored FROM posts WHERE id = ?", Boolean.class, postId);
+        var dateRead = jdbcTemplate.queryForObject("SELECT date_read FROM posts WHERE id = ?", Timestamp.class, postId);
+
+        assertThat(isRead).isTrue();
+        assertThat(isIgnored).isTrue();
+        assertThat(dateRead).isEqualTo(Timestamp.from(Instant.parse("2023-01-01T12:00:00Z")));
+    }
+
+    @Test
+    void shouldNotStoreAiReasonForValidPost() throws Exception {
+        insertBlog("/feed-three-posts", true);
+        doReturn("Post 3 content").when(scrapperService).scrape("https://example.com/post-3");
+        when(aiService.evaluatePost("Post 3 content"))
+                .thenReturn(new AiPostEvaluation(true, "some reasoning"));
+
+        postService.recordLatestBlogPosts(userId);
+
+        var postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE post_name = 'Post 3'", Integer.class);
+        var isIgnored = jdbcTemplate.queryForObject("SELECT is_ignored FROM posts WHERE id = ?", Boolean.class, postId);
+        var aiReason = jdbcTemplate.queryForObject("SELECT ai_reason FROM posts WHERE id = ?", String.class, postId);
+
+        assertThat(isIgnored).isFalse();
+        assertThat(aiReason).isNull();
+    }
+
+    private void insertBlog(String feedPath, boolean useAiFiltering) {
         jdbcTemplate.update("""
-                        INSERT INTO blogs (name, feed_url, is_subscribed, user_id)
-                        VALUES (?, ?, ?, ?)
+                        INSERT INTO blogs (name, feed_url, is_subscribed, user_id, use_ai_filtering)
+                        VALUES (?, ?, ?, ?, ?)
                         """,
-                "Test Blog", wiremockServer.getUrl(feedPath), true, userId);
+                "Test Blog", wiremockServer.getUrl(feedPath), true, userId, useAiFiltering);
         blogId = jdbcTemplate.queryForObject("SELECT id FROM blogs WHERE name = 'Test Blog'", Integer.class);
     }
 
