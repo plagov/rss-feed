@@ -8,8 +8,30 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
 
 @Configuration
-@ImportRuntimeHints(NativeRuntimeHints.FlywayHints.class)
+@ImportRuntimeHints({NativeRuntimeHints.FlywayHints.class, NativeRuntimeHints.AppHints.class})
 public class NativeRuntimeHints {
+
+    static class AppHints implements RuntimeHintsRegistrar {
+        @Override
+        public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+            hints.resources().registerPattern("prompts/*.st");
+
+            hints.reflection().registerType(
+                io.plagov.rssfeed.domain.response.AiPostEvaluation.class,
+                MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS
+            );
+
+            hints.reflection().registerType(
+                JwtProperties.class,
+                MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS
+            );
+
+            hints.reflection().registerType(
+                CorsProperties.class,
+                MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS
+            );
+        }
+    }
 
     static class FlywayHints implements RuntimeHintsRegistrar {
         @Override
