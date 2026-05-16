@@ -11,17 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-
-      - name: Install NPM dependencies
-        run: npm install
-
-      - name: Build Tailwind CSS
-        run: npm run build
-
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
