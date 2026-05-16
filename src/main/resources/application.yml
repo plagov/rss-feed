@@ -8,11 +8,11 @@ spring:
     google:
       genai:
         api-key: ${SPRING_AI_GOOGLE_GENAI_API_KEY}
-      chat:
-        options:
-          model: gemini-2.5-flash
-          response-mime-type: application/json
-          temperature: 0.0
+        chat:
+          options:
+            model: gemini-2.5-flash
+            response-mime-type: application/json
+            temperature: 0.0
 
 app:
   jwt:
