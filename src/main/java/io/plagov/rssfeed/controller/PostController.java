@@ -31,6 +31,12 @@ public class PostController {
         return ResponseEntity.ok(postService.getUnreadPosts(userId));
     }
 
+    @GetMapping("/archive")
+    public ResponseEntity<List<PostResponse>> getArchivedPosts() {
+        var userId = userContextService.getCurrentUserId();
+        return ResponseEntity.ok(postService.getArchivedPosts(userId));
+    }
+
     @PostMapping("/{id}/mark-as-read")
     public ResponseEntity<Void> markPostAsRead(@PathVariable int id) {
         var userId = userContextService.getCurrentUserId();

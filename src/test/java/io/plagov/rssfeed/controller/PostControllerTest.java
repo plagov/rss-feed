@@ -14,6 +14,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.UUID;
 
@@ -63,6 +64,53 @@ class PostControllerTest {
                 .andExpect(jsonPath("$[0].blogName").value("Of Dollars And Data"))
                 .andExpect(jsonPath("$[0].name").value("Post 1"))
                 .andExpect(jsonPath("$[1].name").value("Post 2"));
+    }
+
+    @Test
+    @Sql("/sql/posts/add_archived_read_posts.sql")
+    void shouldReturnArchivedReadPostsForAuthenticatedUser() throws Exception {
+        var token = registerLoginAndAssignSeedBlog("reader");
+        var userId = jdbcTemplate.queryForObject(
+                "SELECT id FROM users WHERE username = ?",
+                UUID.class,
+                "reader"
+        );
+        jdbcTemplate.update("""
+                        INSERT INTO blogs (name, feed_url, is_subscribed, user_id, use_ai_filtering)
+                        VALUES (?, ?, ?, ?, ?)
+                        """,
+                "Second Blog", "https://example.com/second-feed", true, userId, false);
+        var secondBlogId = jdbcTemplate.queryForObject(
+                "SELECT id FROM blogs WHERE name = ?",
+                Integer.class,
+                "Second Blog"
+        );
+        jdbcTemplate.update("""
+                        INSERT INTO posts (blog_id, post_name, post_url, is_read, is_ignored, ai_reason, date_added, date_read)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                secondBlogId, "Post 4", "https://post4.com", true, true, "Low quality duplicate",
+                Timestamp.valueOf("2021-01-04 00:00:00"), Timestamp.valueOf("2021-01-05 00:00:00"));
+
+        mockMvc.perform(get("/api/posts/archive")
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].blogName").value("Second Blog"))
+                .andExpect(jsonPath("$[0].name").value("Post 4"))
+                .andExpect(jsonPath("$[0].url").value("https://post4.com"))
+                .andExpect(jsonPath("$[0].isRead").value(true))
+                .andExpect(jsonPath("$[0].isIgnored").value(true))
+                .andExpect(jsonPath("$[0].aiReason").value("Low quality duplicate"))
+                .andExpect(jsonPath("$[1].name").value("Post 2"))
+                .andExpect(jsonPath("$[1].url").value("https://post2.com"))
+                .andExpect(jsonPath("$[1].isRead").value(true))
+                .andExpect(jsonPath("$[1].isIgnored").value(true))
+                .andExpect(jsonPath("$[1].aiReason").value("AI flagged for archive"))
+                .andExpect(jsonPath("$[2].name").value("Post 1"))
+                .andExpect(jsonPath("$[2].isRead").value(true))
+                .andExpect(jsonPath("$[2].isIgnored").value(true))
+                .andExpect(jsonPath("$[2].aiReason").value("Duplicate content"));
     }
 
     @Test

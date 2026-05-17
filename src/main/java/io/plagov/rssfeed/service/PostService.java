@@ -181,4 +181,8 @@ public class PostService {
     public List<PostResponse> getUnreadPosts(UUID userId) {
         return postDao.getUnreadPostsForUser(userId);
     }
+
+    public List<PostResponse> getArchivedPosts(UUID userId) {
+        return postDao.getReadPostsForUser(userId);
+    }
 }

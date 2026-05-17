@@ -88,6 +88,23 @@ public class PostDao {
                 .list();
     }
 
+    public List<PostResponse> getReadPostsForUser(UUID userId) {
+        var sql = """
+                SELECT p.*,
+                       b.name AS blog_name
+                FROM posts p
+                JOIN blogs b ON p.blog_id = b.id
+                WHERE p.is_read = TRUE
+                  AND b.user_id = :userId
+                ORDER BY p.date_read DESC NULLS LAST, p.date_added DESC
+                """;
+        return jdbcClient
+                .sql(sql)
+                .param("userId", userId)
+                .query(mapToPost())
+                .list();
+    }
+
     public void markPostAsReadForUser(int postId, Timestamp dateRead, UUID userId) {
         var sql = """
                 UPDATE posts p
