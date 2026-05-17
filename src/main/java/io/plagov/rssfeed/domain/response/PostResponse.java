@@ -11,6 +11,7 @@ public record PostResponse(
         boolean isRead,
         boolean isIgnored,
         String aiReason,
-        LocalDateTime dateAdded
+        LocalDateTime dateAdded,
+        LocalDateTime dateRead
 ) {
 }

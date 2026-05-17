@@ -44,7 +44,8 @@ public class PostDao {
                         rs.getBoolean("is_read"),
                         rs.getBoolean("is_ignored"),
                         rs.getString("ai_reason"),
-                        rs.getObject("date_added", LocalDateTime.class)
+                        rs.getObject("date_added", LocalDateTime.class),
+                        rs.getObject("date_read", LocalDateTime.class)
                 );
     }
 

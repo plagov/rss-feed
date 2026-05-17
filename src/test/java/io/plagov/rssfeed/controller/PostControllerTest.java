@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -63,6 +64,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].blogName").value("Of Dollars And Data"))
                 .andExpect(jsonPath("$[0].name").value("Post 1"))
+                .andExpect(jsonPath("$[0].dateRead").value(nullValue()))
                 .andExpect(jsonPath("$[1].name").value("Post 2"));
     }
 
@@ -102,15 +104,18 @@ class PostControllerTest {
                 .andExpect(jsonPath("$[0].isRead").value(true))
                 .andExpect(jsonPath("$[0].isIgnored").value(true))
                 .andExpect(jsonPath("$[0].aiReason").value("Low quality duplicate"))
+                .andExpect(jsonPath("$[0].dateRead").value("2021-01-05T00:00:00"))
                 .andExpect(jsonPath("$[1].name").value("Post 2"))
                 .andExpect(jsonPath("$[1].url").value("https://post2.com"))
                 .andExpect(jsonPath("$[1].isRead").value(true))
                 .andExpect(jsonPath("$[1].isIgnored").value(true))
                 .andExpect(jsonPath("$[1].aiReason").value("AI flagged for archive"))
+                .andExpect(jsonPath("$[1].dateRead").value("2021-01-04T00:00:00"))
                 .andExpect(jsonPath("$[2].name").value("Post 1"))
                 .andExpect(jsonPath("$[2].isRead").value(true))
                 .andExpect(jsonPath("$[2].isIgnored").value(true))
-                .andExpect(jsonPath("$[2].aiReason").value("Duplicate content"));
+                .andExpect(jsonPath("$[2].aiReason").value("Duplicate content"))
+                .andExpect(jsonPath("$[2].dateRead").value("2021-01-02T00:00:00"));
     }
 
     @Test
