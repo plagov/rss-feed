@@ -46,7 +46,7 @@ dependencies {
     implementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     implementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-15")
-    implementation("org.jsoup:jsoup:1.18.3")
+    implementation("org.jsoup:jsoup:1.22.2")
 }
 
 tasks.withType<Test> {
